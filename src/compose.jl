@@ -1,11 +1,10 @@
 #=
-   const AccStruct =
-   [ AccCount, AccMin, AccMax, AccMinAbs, AccMaxAbs,
-     AccExtrema, AccExtremaAbs, 
+     AccCount, 
+     AccMin, AccMax, AccExtrema, 
      AccSum, AccProd,
-     AccMean, AccMeanAbs, AccMeanAbs2, AccGeometricMean, AccHarmonicMean,
+     AccMean, AccGeometricMean, AccHarmonicMean,
      AccMeanVar,
-     AccExpWtMean, AccExpWtMeanVar]
+     AccExpWtMean, AccExpWtMeanVar
 =#
 
 mutable struct AccCount{T} <: Accumulator{T}
