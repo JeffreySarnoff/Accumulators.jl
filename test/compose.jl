@@ -24,3 +24,16 @@
    @test acc() == (sortn8[1], sortn8[end])
 end
 
+@testset "sum, prod" begin
+    acc = AccSum
+    for x in sortn8
+      acc(x)
+    end
+    @test acc() == foldl(+, sortn8; init=0.0)
+
+    acc = AccProd
+    for x in sortn8
+      acc(x)
+    end
+    @test acc() == foldl(*, sortn8; init=1.0)
+end
