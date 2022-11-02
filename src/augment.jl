@@ -196,8 +196,14 @@ function (acc::AccumStats{T})(x) where {T}
     acc
 end
 
-(accum::AccumStats{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum, xs); accum)
+# (accum::AccumStats{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum, xs); accum)
 
+function (acc::AccumStats{T, F})(xs::Seq) where {T, F}
+    @inbounds for i ∈ eachindex(xs)
+        acc(xxs[i])
+    end
+    acc
+end
 #=
 reference for AccExpWtMean, AccExpWtMeanVar
 Incremental calculation of weighted mean and variance
@@ -248,7 +254,7 @@ function (acc::AccumExpWtMeanVar{T, F})(x) where {T, F}
 end
 
 function (acc::AccumExpWtMeanVar{T, F})(xs::Seq) where {T, F}
-    @inbounds for i ∈ eachindex(xxs)
+    @inbounds for i ∈ eachindex(xs)
         acc(xxs[i])
     end
     acc
