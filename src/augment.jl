@@ -1,4 +1,3 @@
-
 mutable struct AccumCount{T,F} <: Accumulator{T}
     n::T
     const fn::F
