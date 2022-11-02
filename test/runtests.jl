@@ -1,3 +1,11 @@
-include("compose.jl")
-include("absvals.jl")
-include("augment.jl")
+@testset "compose" begin
+    include("compose.jl")
+end
+
+@testset "absvals" begin
+    include("absvals.jl")
+end
+
+@testset "augment" begin
+    include("augment.jl")
+end
