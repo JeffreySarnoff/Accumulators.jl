@@ -10,8 +10,8 @@ export Accumulator,
     AccMinAbs, AccMaxAbs, AccMeanAbs, AccMeanAbs2,
     AccSumAbs, AccProdAbs, 
     AccMeanVarAbs, AccMeanVarAbs2, 
-    AccStats, acc_count, acc_mean, acc_var, acc_std, acc_skew, acc_kurt
-
+    AccStats, acc_count, acc_mean, acc_var, acc_std, acc_skew, acc_kurt,
+    AccExpWtMean, AccExpWtMeanVar
 
 abstract type Accumulator{T} end
 
