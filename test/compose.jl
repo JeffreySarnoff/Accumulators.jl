@@ -29,15 +29,15 @@ end
 @testset "means" begin
     acc = AccMean()
     accvals(acc, sortn8)
-    @test acc() == mean(sortn8)
+    @test acc() ≐ mean(sortn8)
    
     acc = AccGeometricMean()
     accvals(acc, sortn8)
-    @test acc() == geomean(map(abs, sortn8))
+    @test acc() ≐ geomean(map(abs, sortn8))
 
     acc = AccHarmonicMean()
     accvals(acc, sortn8)
-    @test acc() == harmmean(sortn8)
+    @test acc() ≐ harmmean(sortn8)
 end
    
    
