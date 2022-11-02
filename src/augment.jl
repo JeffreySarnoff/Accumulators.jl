@@ -32,7 +32,7 @@ mutable struct AccumExtrema{T,FN} <:  Accumulator{T}
     min::T
     max::T
     const fn::FN
-    AccumExtrema(::Type{T,FN}=Float64, fn::FN=identity) where {T,FN} =
+    AccumExtrema(::Type{T}=Float64, fn::FN=identity) where {T,FN} =
         (T <: Integer) ? new{T,FN}(typemax(T), typemin(T), fn) : new{T,FN}(floatmax(T), floatmin(T), fn)
 end
 
