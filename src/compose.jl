@@ -196,7 +196,7 @@ function (acc::AccStats{T})(x) where {T}
     term1 = delta * delta_n * n1
     accm1 += delta_n
     accm4 += term1 * delta_n2 * (accn * accn - 3*accn + 3) + 
-              6 * delta_2 * accm2 - 
+              6 * delta_n2 * accm2 - 
               4 * delta_n * accm3
     accm3 += term1 * delta_n * (n - 2) - 3 * delta_n * accm2
     accm2 += term1
