@@ -45,9 +45,9 @@ end
 (acc::AccExtrema{T})(x) where {T} = (acc.min = ifelse(x < acc.min, T(x), acc.min);
 acc.max = ifelse(acc.max < x, T(x), acc.max))
 
-(acc_max(acc::AccExtrema{T})() where {T} = acc.max
-(acc_min(acc::AccExtrema{T})() where {T} = acc.min
-(acc_midrange(acc::AccExtrema{T})() where {T} = (acc.max / 2) + (acc.min / 2)
+acc_max(acc::AccExtrema{T})() where {T} = acc.max
+acc_min(acc::AccExtrema{T})() where {T} = acc.min
+acc_midrange(acc::AccExtrema{T})() where {T} = (acc.max / 2) + (acc.min / 2)
 
 mutable struct AccSum{T} <: Accumulator{T}
     sum::T
@@ -163,79 +163,10 @@ acc_kurt(acc::AccStats{T})() where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
 
 
 #=
-Acc__Abs
-=#
-#=
-mutable struct AccMinAbs{T} <: Accumulator{T}
-    minabs::T
-    AccMinAbs(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemax(T)) : new{T}(floatmax(T))
-end
-
-(acc::AccMinAbs{T})() where {T} = (acc.minabs)
-(acc::AccMinAbs{T})(x) where {T} = (acc.minabs = ifelse(abs(x) < acc.minabs, T(abs(x)), acc.minabs))
-
-mutable struct AccMaxAbs{T} <: Accumulator{T}
-    maxabs::T
-    AccMaxAbs(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemin(T)) : new{T}(floatmin(T))
-end
-
-(acc::AccMaxAbs{T})() where {T} = (acc.maxabs)
-(acc::AccMaxAbs{T})(x) where {T} = (acc.maxabs = ifelse(acc.maxabs < abs(x), T(abs(x)), acc.maxabs))
-
-mutable struct AccExtremaAbs{T} <: Accumulator{T}
-    minabs::T
-    maxabs::T
-    AccExtremaAbs(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemax(T), zero(T)) : new{T}(floatmax(T), zero(T))
-end
-
-(acc::AccExtremaAbs{T})() where {T} = (acc.minabs, acc.maxabs)
-(acc::AccExtremaAbs{T})(x) where {T} = (acc.minabs = ifelse(acc.minabs > T(abs(x)), T(abs(x)), acc.minabs)
-
-mutable struct AccExtremaAbs{T} <: Accumulator{T}
-
-
-
-
-
-mutable struct AccMaxAbs{T} <: Accumulator{T}
-    maxabs::T
-    AccMaxAbs(::Type{T}=Float64) where {T} = (T <: Integer) ? new{T}(typemin(T)) : new{T}(floatmin(T))
-end
-
-(acc::AccMaxAbs{T})() where {T} = (acc.maxabs)
-(acc::AccMaxAbs{T})(x) where {T} = (acc.maxabs = ifelse(acc.maxabs < abs(x), T(abs(x)), acc.maxabs))
-
-
-
-mutable struct AccMeanAbs{T} <: Accumulator{T}
-    n::Int
-    meanabs::T
-    AccMeanAbs(::Type{T}=Float64) where {T} = new{T}(0, zero(T))
-end
-
-(acc::AccMeanAbs{T})() where {T} = (acc.meanabs)
-(acc::AccMeanAbs{T})(x) where {T} =
-    (acc.n += 1; acc.meanabs += (abs(x) - acc.meanabs) / acc.n)
-
-mutable struct AccMeanAbs2{T} <: Accumulator{T}
-    n::Int
-    meanabs2::T
-    AccMeanAbs2(::Type{T}=Float64) where {T} = new{T}(0, zero(T))
-end
-
-(acc::AccMeanAbs2{T})() where {T} = (acc.meanabs2)
-(acc::AccMeanAbs2{T})(x) where {T} =
-    (acc.n += 1; acc.meanabs2 += (abs2(x) - acc.meanabs2) / acc.n)
-
-#=
 reference for AccExpWMean, AccExpWMeanVar
 
 Incremental calculation of weighted mean and variance
 by Tony Finch
-=#
 
 mutable struct AccExpWMean{T} <: Accumulator{T}
     n::Int
