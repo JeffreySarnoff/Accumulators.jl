@@ -8,7 +8,7 @@ using Accumulators, StatsBase, Test
     end
 end
 
-include("testvals.jl")
+include("constants.jl")
 
 @testset "compose" begin
     include("compose.jl")
