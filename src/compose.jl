@@ -190,6 +190,14 @@ function (acc::AccStats{T})(x) where {T}
     acc
 end
 
+function (acc:AccStats{T})(xs::Seq)
+    Σ = one(T)
+    @turbo for i ∈ eachindex(xs)
+        acc(xs[i])
+    end
+    acc
+end
+
 acc_count(acc::AccStats{T}) where {T} = acc.n
 acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
 acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
@@ -214,6 +222,13 @@ end
 (acc::AccExpWtMean{T})() where {T} = (acc.mean)
 (acc::AccExpWtMean{T})(x) where {T} = (acc.n += 1; acc.mean += acc.alpha * (x - acc.mean); acc)
 
+function (acc:AccExpWtMean{T})(xs::Seq)
+    @turbo for i ∈ eachindex(xs)
+        acc(xs[i])
+    end
+    acc
+end
+                                                  
 mutable struct AccExpWtMeanVar{T} <: Accumulator{T}
     n::Int
     alpha::T
@@ -233,6 +248,13 @@ function (acc::AccExpWtMeanVar{T})(x) where {T}
     incr = acc.alpha * diff
     acc.mean += acc.alpha * (x - acc.mean)
     acc.svar = (one(T) - acc.alpha) * (acc.svar + diff * incr)
+    acc
+end
+
+function (acc:AccExpWtMeanVar{T})(xs::Seq)
+    @turbo for i ∈ eachindex(xs)
+        acc(xs[i])
+    end
     acc
 end
 
