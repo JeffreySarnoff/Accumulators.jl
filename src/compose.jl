@@ -17,38 +17,43 @@ end
 (acc::AccCount{T})(xs::Seq) where {T} = (acc.n += T(length(xs)); acc)
 
 mutable struct AccMin{T} <: Accumulator{T}
+    n::Int
     min::T
     AccMin(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemax(T)) : new{T}(floatmax(T))
+        (T <: Integer) ? new{T}(typemax(T)) : new{T}(0, floatmax(T))
 end
 
 (acc::AccMin{T})() where {T} = (acc.min)
-(acc::AccMin{T})(x) where {T} = (acc.min = ifelse(x < acc.min, T(x), acc.min); acc)
-(acc::AccMin{T})(xs::Seq) where {T} = (x = T(vminimum(xs)); acc.min = ifelse(x < acc.min, x, acc.min); acc)
+(acc::AccMin{T})(x) where {T} = (acc.n +=1; acc.min = ifelse(x < acc.min, T(x), acc.min); acc)
+(acc::AccMin{T})(xs::Seq) where {T} = (acc.n += length(xs); x = T(vminimum(xs)); acc.min = ifelse(x < acc.min, x, acc.min); acc)
 
 mutable struct AccMax{T} <: Accumulator{T}
+    n::Int
     max::T
     AccMax(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemin(T)) : new{T}(floatmin(T))
+        (T <: Integer) ? new{T}(typemin(T)) : new{T}(0, floatmin(T))
 end
 
 (acc::AccMax{T})() where {T} = (acc.max)
-(acc::AccMax{T})(x) where {T} = (acc.max = ifelse(acc.max < x, T(x), acc.max); acc)
-(acc::AccMax{T})(xs::Seq) where {T} = (x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, x, acc.max); acc)
+(acc::AccMax{T})(x) where {T} = (acc.n += 1; acc.max = ifelse(acc.max < x, T(x), acc.max); acc)
+(acc::AccMax{T})(xs::Seq) where {T} = (acc.n += length(xs); x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, x, acc.max); acc)
 
 mutable struct AccExtrema{T} <: Accumulator{T}
+    n::T
     min::T
     max::T
     AccExtrema(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemax(T), typemin(T)) : new{T}(floatmax(T), floatmin(T))
+        (T <: Integer) ? new{T}(typemax(T), typemin(T)) : new{T}(0, floatmax(T), floatmin(T))
 end
 
 (acc::AccExtrema{T})() where {T} = (acc.min, acc.max)
 (acc::AccExtrema{T})(x) where {T} = 
-    (acc.min = ifelse(x < acc.min, T(x), acc.min);
+    (acc.n +=1;
+     acc.min = ifelse(x < acc.min, T(x), acc.min);
      acc.max = ifelse(acc.max < x, T(x), acc.max); acc)
 
 function (acc::AccExtrema{T})(xs::Seq) where {T}
+   acc.n += length(xs)
    mn, mx = map(T, vminimum(xs))
    acc.min = ifelse(mn < acc.min, mn, acc.min)
    acc.max = ifelse(mx > acc.max, mx, acc.max)
@@ -60,23 +65,26 @@ acc_min(acc::AccExtrema{T}) where {T} = acc.min
 acc_midrange(acc::AccExtrema{T}) where {T} = (acc.max / 2) + (acc.min / 2)
 
 mutable struct AccSum{T} <: Accumulator{T}
+    n::Int
     sum::T
-    AccSum(::Type{T}=Float64) where {T} = new{T}(zero(T),)
+    AccSum(::Type{T}=Float64) where {T} = new{T}(0, zero(T))
 end
 
 (acc::AccSum{T})() where {T} = (acc.sum)
-(acc::AccSum{T})(x) where {T} = (acc.sum += x; acc)
-(acc::AccSum{T})(xs::Seq) where {T} = (x = T(vsum(xs)); acc.sum += x; acc)
+(acc::AccSum{T})(x) where {T} = (acc.n += 1; acc.sum += x; acc)
+(acc::AccSum{T})(xs::Seq) where {T} = (acc.n =+ length(xs); x = T(vsum(xs)); acc.sum += x; acc)
 
 mutable struct AccProd{T} <: Accumulator{T}
+    n::Int
     prod::T
-    AccProd(::Type{T}=Float64) where {T} = new{T}(one(T),)
+    AccProd(::Type{T}=Float64) where {T} = new{T}(0, one(T))
 end
 
 (acc::AccProd{T})() where {T} = (acc.prod)
-(acc::AccProd{T})(x) where {T} = (acc.prod *= x; acc)
+(acc::AccProd{T})(x) where {T} = (acc.n += 1; acc.prod *= x; acc)
 
 function (acc::AccProd{T})(xs::Seq) where {T}
+    acc.n += length(xs)
     Σ = one(T)
     @turbo for i ∈ eachindex(xs)
         Σ *= xs[i]
