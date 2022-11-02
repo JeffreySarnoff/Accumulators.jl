@@ -60,10 +60,6 @@ function (acc::AccExtrema{T})(xs::Seq) where {T}
    acc
 end
 
-acc_max(acc::AccExtrema{T}) where {T} = acc.max
-acc_min(acc::AccExtrema{T}) where {T} = acc.min
-acc_midrange(acc::AccExtrema{T}) where {T} = (acc.max / 2) + (acc.min / 2)
-
 mutable struct AccSum{T} <: Accumulator{T}
     n::Int
     sum::T
@@ -174,6 +170,10 @@ function (acc::AccMeanVar{T})(xs::Seq) where {T}
     acc
 end
 
+acc_mean(acc::AccMeanVar{T}) where {T} = T(acc.m1)
+acc_var(acc::AccMeanVar{T}) where {T} = T(acc.m2 / (acc.n - 1))
+acc_std(acc::AccMeanVar{T}) where {T} = sqrt(acc_var(acc))
+
 # see https://www.johndcook.com/blog/skewness_kurtosis/
 
 mutable struct AccStats{T} <: Accumulator{T}
@@ -212,13 +212,6 @@ function (acc::AccStats{T})(xs::Seq) where {T}
     end
     acc
 end
-
-acc_count(acc::AccStats{T}) where {T} = acc.n
-acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
-acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
-acc_std(acc::AccStats{T}) where {T} = T(sqrt(var(x)))
-acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
 
 #=
 reference for AccExpWtMean, AccExpWtMeanVar
@@ -275,7 +268,24 @@ end
 
 # other derived
 
-acc_count(acc::Accumulator) = acc.n
+acc_count(@nospecialize acc::Accumulator) = acc.n
+
+acc_min(acc::AccMin{T}) where {T} = acc.min
+acc_max(acc::AccMax{T}) where {T} = acc.max
+
+acc_min(acc::AccExtrema{T}) where {T} = acc.min
+acc_max(acc::AccExtrema{T}) where {T} = acc.max
+acc_midrange(acc::AccExtrema{T}) where {T} = (acc.max / 2) + (acc.min / 2)
+                                                                      
+acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
+acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
+acc_std(acc::AccStats{T}) where {T} = T(sqrt(var(x)))
+acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
+                                                                      
+acc_mean(acc::AccMean{T}) where {T} = acc.mean
+acc_mean(acc::AccGeometricMean{T}) where {T} = acc()
+acc_mean(acc::AccHarmonicMean{T}) where {T} = acc()
 
 acc_mean(acc::AccMeanVar{T}) where {T} = acc.mean
 acc_var(acc::AccMeanVar{T}) where {T} = acc.svar / (acc.n - 1)
