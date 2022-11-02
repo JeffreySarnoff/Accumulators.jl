@@ -134,7 +134,7 @@ mutable struct AccumStats{T,FN} <: Accumulator{T}
     m3::T
     m4::T
     const fn::FN
-    AccumStats(::Type{T}=Float64, fn::FN=identity) where {T} = new{T}(0, zero(T), zero(T), zero(T), zero(T), fn)
+    AccumStats(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), zero(T), zero(T), zero(T), fn)
 end
 
 function (acc::AccumStats{T})() where {T}
