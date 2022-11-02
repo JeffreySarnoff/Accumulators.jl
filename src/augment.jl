@@ -2,6 +2,7 @@ mutable struct AccumCount{T,F} <: Accumulator{T}
     n::T
     const fn::F
     AccumCount(::Type{T}=Int64, fn::F=identity) where {T,F} = new{T,F}(zero(T), fn)
+    AccumCount(fn::F=identity, ::Type{T}=Int64) where {T,F} = new{T,F}(zero(T), fn)
 end
 
 (acc::AccumCount{T,F})() where {T,F} = acc.n
@@ -14,6 +15,8 @@ mutable struct AccumMin{T,F} <: Accumulator{T}
     const fn::F
     AccumMin(::Type{T}=Float64, fn::F=identity) where {T,F} =
         (T <: Integer) ? new{T,F}(0, typemax(T), fn) : new{T,F}(0, floatmax(T), fn)
+    AccumMin(fn::F=identity, ::Type{T}=Float64) where {T,F} =
+        (T <: Integer) ? new{T,F}(0, typemax(T), fn) : new{T,F}(0, floatmax(T), fn)
 end
 
 (acc::AccumMin{T,F})() where {T,F} = acc.min
@@ -25,6 +28,8 @@ mutable struct AccumMax{T,F} <: Accumulator{T}
     max::T
     const fn::F
     AccumMax(::Type{T}=Float64, fn::F=identity) where {T,F} =
+        (T <: Integer) ? new{T,F}(0, typemin(T), fn) : new{T,F}(0, floatmin(T), fn)
+    AccumMax(fn::F=identity, ::Type{T}=Float64) where {T,F} =
         (T <: Integer) ? new{T,F}(0, typemin(T), fn) : new{T,F}(0, floatmin(T), fn)
 end
 
