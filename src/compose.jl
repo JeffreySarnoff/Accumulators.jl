@@ -155,12 +155,12 @@ function (acc::AccStats{T})(x) where {T}
     acc.m2 += term1
 end
 
-acc_count(acc::AccStats{T})() where {T} = acc.n
-acc_mean(acc::AccStats{T})() where {T} = T(acc.m1)
-acc_var(acc::AccStats{T})() where {T} = T(acc.m2 / (acc.n - 1))
-acc_std(acc::AccStats{T})() where {T} = T(sqrt(var(x)))
-acc_skew(acc::AccStats{T})() where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-acc_kurt(acc::AccStats{T})() where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
+acc_count(acc::AccStats{T}) where {T} = acc.n
+acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
+acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
+acc_std(acc::AccStats{T}) where {T} = T(sqrt(var(x)))
+acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
 
 
 #=
