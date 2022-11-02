@@ -28,16 +28,16 @@ end
 
 @testset "means" begin
     acc = AccMean()
-    accvals(acc, randn8)
-    @test acc() == mean(randn8)
+    accvals(acc, sortn8)
+    @test acc() == mean(sortn8)
    
     acc = AccGeometricMean()
-    accvals(acc, randn8)
-    @test acc() == geomean(map(abs,randn8))
+    accvals(acc, sortn8)
+    @test acc() == geomean(map(abs, sortn8))
 
     acc = AccHarmonicMean()
-    accvals(acc, randn8)
-    @test acc() == harmmean(randn8)
+    accvals(acc, sortn8)
+    @test acc() == harmmean(sortn8)
 end
    
    
