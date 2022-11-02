@@ -76,7 +76,7 @@ end
 (acc::AccProd{T})() where {T} = (acc.prod)
 (acc::AccProd{T})(x) where {T} = (acc.prod *= x; acc)
 
-function (acc:AccProd{T})(xs::Seq) where {T}
+function (acc::AccProd{T})(xs::Seq) where {T}
     Σ = one(T)
     @turbo for i ∈ eachindex(xs)
         Σ *= xs[i]
