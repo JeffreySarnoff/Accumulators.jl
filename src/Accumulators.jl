@@ -13,8 +13,8 @@ export Accumulator,
     AccSumAbs, AccSumAbs2, AccProdAbs, AccProdAbs2, 
     AccMeanAbs, AccMeanAbs2, AccMeanVarAbs, AccMeanVarAbs2,
     # acc_ are convienice getters for appropriate accumulators
-    acc_count, acc_mean, acc_var, acc_std, acc_skew, acc_kurt,
-    acc_midrange,
+    acc_count, acc_min, acc_max, acc_midrange,
+    acc_mean, acc_var, acc_std, acc_skew, acc_kurt,
     # Accum is Acc with a specified function applied to each new 'x'
     AccumCount,
     AccumMin, AccumMax, AccumExtrema,
