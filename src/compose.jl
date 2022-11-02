@@ -163,38 +163,37 @@ acc_std(acc::AccStats{T}) where {T} = T(sqrt(var(x)))
 acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
 acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
 
-
 #=
-reference for AccExpWMean, AccExpWMeanVar
+reference for AccExpWtMean, AccExpWtMeanVar
 
 Incremental calculation of weighted mean and variance
 by Tony Finch
-
-mutable struct AccExpWMean{T} <: Accumulator{T}
+=#
+                           
+mutable struct AccExpWtMean{T} <: Accumulator{T}
     n::Int
     alpha::T
-    expwmean::T
-    AccExpWMean(::Type{T}=Float64; alpha::T=0.5) where {T} = new{T}(0, alpha, zero(T))
+    mean::T
+    AccExpWtMean(::Type{T}=Float64; alpha::T=0.5) where {T} = new{T}(0, alpha, zero(T))
 end
 
-(acc::AccExpWMean{T})() where {T} = (acc.expwmean)
-(acc::AccExpWMean{T})(x) where {T} = (acc.n += 1; acc.expwmean += acc.alpha * (x - a.expwmean))
+(acc::AccExpWtMean{T})() where {T} = (acc.mean)
+(acc::AccExpWtMean{T})(x) where {T} = (acc.n += 1; acc.mean += acc.alpha * (x - acc.mean))
 
-
-mutable struct AccExpWMeanVar{T} <: Accumulator{T}
+mutable struct AccExpWtMeanVar{T} <: Accumulator{T}
     n::Int
     alpha::T
     mean::T
     svar::T
-    AccExpWMeanVar(::Type{T}=Float64; alpha::T=0.5) where {T} = new{T}(0, alpha, zero(T), zero(T))
+    AccExpWtMeanVar(::Type{T}=Float64; alpha::T=0.5) where {T} = new{T}(0, alpha, zero(T), zero(T))
 end
 
-function(acc::AccExpWMeanVar{T})() where {T}
+function(acc::AccExpWtMeanVar{T})() where {T}
     unbiased_var = acc.svar / (acc.n = 1)
     (acc.mean, unbiased_var)
 end
 
-function (acc::AccExpWMeanVar{T})(x) where {T}
+function (acc::AccExpWtMeanVar{T})(x) where {T}
     acc.n += 1
     diff = x - acc.mean
     incr = acc.alpha * diff
@@ -204,15 +203,16 @@ end
 
 # other derived
 
-count(acc::Accumulator) = acc.n
+acc_count(acc::Accumulator) = acc.n
 
-mean(acc::AccMeanVar{T}) where {T} = acc.mean
-var(acc::AccMeanVar{T}) where {T} = acc.svar / (acc.n - 1)
-std(acc::AccMeanVar{T}) where {T} = sqrt(acc.svar / (acc.n - 1))
+acc_mean(acc::AccMeanVar{T}) where {T} = acc.mean
+acc_var(acc::AccMeanVar{T}) where {T} = acc.svar / (acc.n - 1)
+acc_std(acc::AccMeanVar{T}) where {T} = sqrt(acc.svar / (acc.n - 1))
 
-mean(acc::AccExpWMeanVar{T}) where {T} = acc.expwmean
-var(acc::AccExpWMeanVar{T}) where {T} = acc.expwvariance / (acc.n - 1)
-std(acc::AccExpWMeanVar{T}) where {T} = sqrt(acc.expwvariance / (acc.n - 1))
+acc_mean(acc::AccExpWtMean{T}) where {T} = acc.mean
 
-=#
+acc_mean(acc::AccExpWtMeanVar{T}) where {T} = acc.mean
+acc_var(acc::AccExpWtMeanVar{T}) where {T} = acc.svar / (acc.n - 1)
+acc_std(acc::AccExpWtMeanVar{T}) where {T} = sqrt(acc_var(acc))
+
 
