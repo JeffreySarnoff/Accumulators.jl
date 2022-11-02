@@ -41,7 +41,7 @@ mutable struct AccumExtrema{T,F} <: Accumulator{T}
     max::T
     const fn::F
     AccumExtrema(::Type{T}=Float64, fn::F=identity) where {T,F} =
-        (T <: Integer) ? new{T}(0, 0, 0, typemax(T), typemin(T), fn) : new{T}(0, 0, 0, floatmax(T), floatmin(T), fn)
+        (T <: Integer) ? new{T, F}(0, 0, 0, typemax(T), typemin(T), fn) : new{T, F}(0, 0, 0, floatmax(T), floatmin(T), fn)
 end
 
 (acc::AccumExtrema{T,F})() where {T,F} = (acc.min, acc.max)
@@ -76,22 +76,24 @@ function (acc::AccumExtrema{T,F})(xs::Seq) where {T,F}
 end
 
 mutable struct AccumSum{T,FN} <:  Accumulator{T}
+    n::Int
     sum::T
     const fn::FN
-    AccumSum(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T,FN}(zero(T), fn)
+    AccumSum(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T, FN}(0, zero(T), fn)
 end
 
-(accum::AccumSum{T,FN})() where {T,FN} = (accum.sum)
-(accum::AccumSum{T,FN})(x) where {T,FN} = (accum.sum += accum.fn(x); accum)
+(accum::AccumSum{T,FN})() where {T,FN} = accum.sum
+(accum::AccumSum{T,FN})(x) where {T,FN} = (accum.n +=1; accum.sum += accum.fn(x); accum)
 
 mutable struct AccumProd{T,FN} <:  Accumulator{T}
+    n::Int
     prod::T
     const fn::FN
-    AccumProd(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T,FN}(one(T), fn)
+    AccumProd(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T, FN}(0, one(T), fn)
 end
 
-(accum::AccumProd{T,FN})() where {T,FN} = (accum.prod)
-(accum::AccumProd{T,FN})(x) where {T,FN} = (accum.prod *= accum.fn(x); accum)
+(accum::AccumProd{T,FN})() where {T,FN} = accum.prod
+(accum::AccumProd{T,FN})(x) where {T,FN} = (accum.n += 1; accum.prod *= accum.fn(x); accum)
 
 mutable struct AccumMean{T,FN} <:  Accumulator{T}
     n::Int
