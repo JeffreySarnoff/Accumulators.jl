@@ -6,7 +6,7 @@ mutable struct AccumCount{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumCount{T,FN})() where {T,FN} = (accum.n)
-(accum::AccumCount{T,FN})(x) where {T,FN} = (accum.n += accum.fn(one(T)))
+(accum::AccumCount{T,FN})(x) where {T,FN} = (accum.n += accum.fn(one(T)); accum.n)
 
 mutable struct AccumMin{T,FN} <:  Accumulator{T}
     min::T
@@ -16,7 +16,7 @@ mutable struct AccumMin{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumMin{T,FN})() where {T,FN} = (accum.min)
-(accum::AccumMin{T,FN})(x) where {T,FN} = (accum.min = ifelse(x < accum.min, accum.fn(T(x)), accum.min))
+(accum::AccumMin{T,FN})(x) where {T,FN} = (accum.min = ifelse(x < accum.min, accum.fn(T(x)), accum.min); accum.min)
 
 mutable struct AccumMax{T,FN} <:  Accumulator{T}
     max::T
@@ -26,7 +26,7 @@ mutable struct AccumMax{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumMax{T,FN})() where {T,FN} = (accum.max)
-(accum::AccumMax{T,FN})(x) where {T,FN} = (accum.max = ifelse(accum.max < x, accum.fn(T(x)), accum.max))
+(accum::AccumMax{T,FN})(x) where {T,FN} = (accum.max = ifelse(accum.max < x, accum.fn(T(x)), accum.max); accum.max)
 
 mutable struct AccumExtrema{T,FN} <:  Accumulator{T}
     min::T
@@ -39,7 +39,7 @@ end
 (accum::AccumExtrema{T,FN})() where {T,FN} = (accum.min, accum.max)
 (accum::AccumExtrema{T,FN})(x) where {T,FN} = 
     (accum.min = ifelse(x < accum.min, accum.fn(T(x)), accum.min); 
-     accum.max = ifelse(accum.max < x, fn(T(x)), accum.max))
+     accum.max = ifelse(accum.max < x, fn(T(x)), accum.max); (accum.min, accum.max))
 
 acc_min(accum::AccumExtrema{T,FN}) where {T,FN} = accum.min
 acc_max(accum::AccumExtrema{T,FN}) where {T,FN} = accum.max
@@ -52,7 +52,7 @@ mutable struct AccumSum{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumSum{T,FN})() where {T,FN} = (accum.sum)
-(accum::AccumSum{T,FN})(x) where {T,FN} = (accum.sum += accum.fn(x))
+(accum::AccumSum{T,FN})(x) where {T,FN} = (accum.sum += accum.fn(x); accum.sum)
 
 mutable struct AccumProd{T,FN} <:  Accumulator{T}
     prod::T
@@ -61,7 +61,7 @@ mutable struct AccumProd{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumProd{T,FN})() where {T,FN} = (accum.prod)
-(accum::AccumProd{T,FN})(x) where {T,FN} = (accum.prod *= accum.fn(x))
+(accum::AccumProd{T,FN})(x) where {T,FN} = (accum.prod *= accum.fn(x); accum.prod)
 
 mutable struct AccumMean{T,FN} <:  Accumulator{T}
     n::Int
@@ -72,7 +72,7 @@ end
 
 (accum::AccumMean{T,FN})() where {T,FN} = (accum.mean)
 (accum::AccumMean{T,FN})(x) where {T,FN} =
-    (accum.n += 1; accum.mean += (accum.fn(x) - accum.mean) / accum.n)
+    (accum.n += 1; accum.mean += (accum.fn(x) - accum.mean) / accum.n; accum.mean)
 
 # geometric mean (of abs(xs))
 # see https://github.com/stdlib-js/stats/blob/main/incr/gmean/lib/main.js
@@ -84,7 +84,7 @@ mutable struct AccumGeometricMean{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumGeometricMean{T,FN})() where {T,FN} = (iszero(accum.n) ? one(T) : exp(accum.sumlog / accum.n))
-(accum::AccumGeometricMean{T,FN})(x) where {T,FN} = (accum.n += 1; accum.sumlog += log(abs(accum.fn(x))))
+(accum::AccumGeometricMean{T,FN})(x) where {T,FN} = (accum.n += 1; accum.sumlog += log(abs(accum.fn(x))); accum())
 
 # harmonic mean
 # see https://github.com/stdlib-js/stats/blob/main/incr/hmean/lib/main.js
@@ -96,7 +96,7 @@ mutable struct AccumHarmonicMean{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumHarmonicMean{T})() where {T} = (iszero(accum.n) ? one(T) : accum.n / accum.hmean)
-(accum::AccumHarmonicMean{T})(x) where {T} = (accum.n += 1; accum.hmean += (one(T) / accum.fn(x)))
+(accum::AccumHarmonicMean{T})(x) where {T} = (accum.n += 1; accum.hmean += (one(T) / accum.fn(x)); accum())
 
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
@@ -123,5 +123,6 @@ function (accum::AccumMeanVar{T,FN})(x) where {T,FN}
     else
         accum.mean = accum.fn(x)  # svar is zero already
     end
+    accum()
 end
 
