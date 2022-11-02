@@ -41,7 +41,9 @@ end
     (accum.min = ifelse(x < accum.min, accum.fn(T(x)), accum.min); 
      accum.max = ifelse(accum.max < x, fn(T(x)), accum.max))
 
-acc_midrange(accum::AccumExtrema{T,FN})() where {T,FN} = (accum.max / 2) + (accum.min / 2)
+acc_min(accum::AccumExtrema{T,FN}) where {T,FN} = accum.min
+acc_max(accum::AccumExtrema{T,FN}) where {T,FN} = accum.max
+acc_midrange(accum::AccumExtrema{T,FN}) where {T,FN} = (accum.max / 2) + (accum.min / 2)
 
 mutable struct AccumSum{T,FN} <:  Accumulator{T}
     sum::T
