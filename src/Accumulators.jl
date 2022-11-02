@@ -24,6 +24,7 @@ export Accumulator,
     AccumStats,
     AccumExpWtMean, AccumExpWtMeanVar
 
+using VectorizedStatistics
 
 abstract type Accumulator{T} end
 
