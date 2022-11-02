@@ -8,7 +8,7 @@ export Accumulator,
     AccMean, AccGeometricMean, AccHarmonicMean,
     AccMeanVar,
     AccStats,
-    AccExpWtMean, AccExpWtMeanVar
+    AccExpWtMean, AccExpWtMeanVar,
     AccMinAbs, AccMinAbs2, AccMaxAbs, AccMaxAbs2,
     AccSumAbs, AccSumAbs2, AccProdAbs, AccProdAbs2, 
     AccMeanAbs, AccMeanAbs2, AccMeanVarAbs, AccMeanVarAbs2,
