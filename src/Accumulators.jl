@@ -30,6 +30,7 @@ using VectorizedStatistics
 const Seq = Union{AbstractVector{T}, NTuple{N,T}} where {N,T}
 
 logabs(x) = log(abs(x))
+sumlogabs(xs::Seq) = vsum(map(logabs, xs))
 
 abstract type Accumulator{T} end
 
