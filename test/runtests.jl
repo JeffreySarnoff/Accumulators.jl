@@ -1,6 +1,6 @@
 using Accumulators, StatsBase, Test
 
-≐(a, b) = isapprox(a, b; rtol=eps(a)^0.875)
+≐(a, b) = isapprox(a, b; rtol=eps(a)^0.75)
 
 @inline function accvals(acc, vals)
     for x in vals
