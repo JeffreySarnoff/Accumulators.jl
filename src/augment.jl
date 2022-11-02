@@ -17,7 +17,7 @@ mutable struct AccumMin{T,F} <: Accumulator{T}
 end
 
 (acc::AccumMin{T,F})() where {T,F} = acc.min
-(acc::AccumMin{T,F})(x) where {T,F} = (acc.n +=1; acc.min = ifelse(x < acc.min, fn(T(x)), acc.min); acc)
+(acc::AccumMin{T,F})(x) where {T,F} = (acc.n += 1; acc.min = ifelse(x < acc.min, fn(T(x)), acc.min); acc)
 (acc::AccumMin{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vminimum(xs)); acc.min = ifelse(x < acc.min, fn(x), acc.min); acc)
 
 mutable struct AccumMax{T,F} <: Accumulator{T}
@@ -29,7 +29,7 @@ mutable struct AccumMax{T,F} <: Accumulator{T}
 end
 
 (acc::AccumMax{T,F})() where {T,F} = acc.max
-(acc::AccumMax{T,F})(x) where {T,F} = (acc.n +=1; acc.min = ifelse(x < acc.min, fn(T(x)), acc.max); acc)
+(acc::AccumMax{T,F})(x) where {T,F} = (acc.n += 1; acc.min = ifelse(x < acc.min, fn(T(x)), acc.max); acc)
 (acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, fn(x), acc.max); acc)
 
 mutable struct AccumExtrema{T,F} <: Accumulator{T}
@@ -82,7 +82,8 @@ mutable struct AccumSum{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumSum{T,FN})() where {T,FN} = accum.sum
-(accum::AccumSum{T,FN})(x) where {T,FN} = (accum.n +=1; accum.sum += accum.fn(x); accum)
+(accum::AccumSum{T,FN})(x) where {T,FN} = (accum.n += 1; accum.sum += accum.fn(x); accum)
+(accum::AccumSum{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum.fn, xs); x = T(vsum(xxs)); accum.sum += x; accum)
 
 mutable struct AccumProd{T,FN} <:  Accumulator{T}
     n::Int
@@ -93,6 +94,7 @@ end
 
 (accum::AccumProd{T,FN})() where {T,FN} = accum.prod
 (accum::AccumProd{T,FN})(x) where {T,FN} = (accum.n += 1; accum.prod *= accum.fn(x); accum)
+(accum::AccumProd{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum.fn, xs); x = T(prod(xxs)); accum.prod += x; accum)
 
 mutable struct AccumMean{T,FN} <:  Accumulator{T}
     n::Int
@@ -104,6 +106,7 @@ end
 (accum::AccumMean{T,FN})() where {T,FN} = (accum.mean)
 (accum::AccumMean{T,FN})(x) where {T,FN} =
     (accum.n += 1; accum.mean += (accum.fn(x) - accum.mean) / accum.n; accum)
+(accum::AccumMean{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum.fn, xs); x = T(vmean(xxs)); accum.sum += x; accum)
 
 # geometric mean (of abs(xs))
 # see https://github.com/stdlib-js/stats/blob/main/incr/gmean/lib/main.js
@@ -116,6 +119,7 @@ end
 
 (accum::AccumGeometricMean{T,FN})() where {T,FN} = (iszero(accum.n) ? one(T) : exp(accum.sumlog / accum.n))
 (accum::AccumGeometricMean{T,FN})(x) where {T,FN} = (accum.n += 1; accum.sumlog += log(abs(accum.fn(x))); accum)
+(accum::AccumGeometricMean{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum, xs); accum)
 
 # harmonic mean
 # see https://github.com/stdlib-js/stats/blob/main/incr/hmean/lib/main.js
@@ -128,6 +132,7 @@ end
 
 (accum::AccumHarmonicMean{T})() where {T} = (iszero(accum.n) ? one(T) : accum.n / accum.hmean)
 (accum::AccumHarmonicMean{T})(x) where {T} = (accum.n += 1; accum.hmean += (one(T) / accum.fn(x)); accum)
+(accum::AccumHarmonicMean{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum, xs); accum)
 
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
@@ -156,6 +161,8 @@ function (accum::AccumMeanVar{T,FN})(x) where {T,FN}
     end
     accum
 end
+
+(accum::AccumMeanVar{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum, xs); accum)
 
 # see https://www.johndcook.com/blog/skewness_kurtosis/
 
@@ -189,7 +196,7 @@ function (acc::AccumStats{T})(x) where {T}
     acc
 end
 
-
+(accum::AccumStats{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum, xs); accum)
 
 #=
 reference for AccExpWtMean, AccExpWtMeanVar
@@ -207,6 +214,7 @@ end
 
 (acc::AccumExpWtMean{T, F})() where {T, F} = acc.mean
 (acc::AccumExpWtMean{T, F})(x) where {T, F} = (acc.n += 1; acc.mean += acc.alpha * (x - acc.mean); acc)
+(acc::AccumExpWtMean{T,FN})(xs::Seq) where {T,FN} = (acc.n += length(xs); xxs = map(acc, xs); acc)
 
 function (acc::AccumExpWtMean{T, F})(xs::Seq) where {T, F}
     @inbounds for i ∈ eachindex(xs)
