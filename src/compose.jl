@@ -162,10 +162,10 @@ function (acc::AccMeanVar{T})(xs::Seq) where {T}
         acc.svar = acc.svar + (m - oldmean) * (m - acc.mean)
     else
         acc.mean = m
-    end                                              
+    end
     acc
 end
-                                        
+
 # see https://www.johndcook.com/blog/skewness_kurtosis/
 
 mutable struct AccStats{T} <: Accumulator{T}
