@@ -13,7 +13,7 @@ mutable struct AccCount{T} <: Accumulator{T}
 end
 
 (acc::AccCount{T})() where {T} = (acc.n)
-(acc::AccCount{T})(x) where {T} = (acc.n += one(T); nothing)
+(acc::AccCount{T})(x) where {T} = (acc.n += one(T); acc)
 
 mutable struct AccMin{T} <: Accumulator{T}
     min::T
@@ -22,7 +22,7 @@ mutable struct AccMin{T} <: Accumulator{T}
 end
 
 (acc::AccMin{T})() where {T} = (acc.min)
-(acc::AccMin{T})(x) where {T} = (acc.min = ifelse(x < acc.min, T(x), acc.min); nothing)
+(acc::AccMin{T})(x) where {T} = (acc.min = ifelse(x < acc.min, T(x), acc.min); acc)
 
 mutable struct AccMax{T} <: Accumulator{T}
     max::T
@@ -31,7 +31,7 @@ mutable struct AccMax{T} <: Accumulator{T}
 end
 
 (acc::AccMax{T})() where {T} = (acc.max)
-(acc::AccMax{T})(x) where {T} = (acc.max = ifelse(acc.max < x, T(x), acc.max); nothing)
+(acc::AccMax{T})(x) where {T} = (acc.max = ifelse(acc.max < x, T(x), acc.max); acc)
 
 mutable struct AccExtrema{T} <: Accumulator{T}
     min::T
@@ -43,7 +43,7 @@ end
 (acc::AccExtrema{T})() where {T} = (acc.min, acc.max)
 (acc::AccExtrema{T})(x) where {T} = 
     (acc.min = ifelse(x < acc.min, T(x), acc.min);
-     acc.max = ifelse(acc.max < x, T(x), acc.max); nothing)
+     acc.max = ifelse(acc.max < x, T(x), acc.max); acc)
 
 acc_max(acc::AccExtrema{T}) where {T} = acc.max
 acc_min(acc::AccExtrema{T}) where {T} = acc.min
@@ -55,7 +55,7 @@ mutable struct AccSum{T} <: Accumulator{T}
 end
 
 (acc::AccSum{T})() where {T} = (acc.sum)
-(acc::AccSum{T})(x) where {T} = (acc.sum += x; nothing)
+(acc::AccSum{T})(x) where {T} = (acc.sum += x; acc)
 
 mutable struct AccProd{T} <: Accumulator{T}
     prod::T
@@ -63,7 +63,7 @@ mutable struct AccProd{T} <: Accumulator{T}
 end
 
 (acc::AccProd{T})() where {T} = (acc.prod)
-(acc::AccProd{T})(x) where {T} = (acc.prod *= x; nothing)
+(acc::AccProd{T})(x) where {T} = (acc.prod *= x; acc)
 
 mutable struct AccMean{T} <: Accumulator{T}
     n::Int
@@ -73,7 +73,7 @@ end
 
 (acc::AccMean{T})() where {T} = (acc.mean)
 (acc::AccMean{T})(x) where {T} =
-    (acc.n += 1; acc.mean += (x - acc.mean) / acc.n; nothing)
+    (acc.n += 1; acc.mean += (x - acc.mean) / acc.n; acc)
 
 # geometric mean (of abs(xs))
 # see https://github.com/stdlib-js/stats/blob/main/incr/gmean/lib/main.js
@@ -84,7 +84,7 @@ mutable struct AccGeometricMean{T} <: Accumulator{T}
 end
 
 (acc::AccGeometricMean{T})() where {T} = (iszero(acc.n) ? one(T) : exp(acc.sumlog / acc.n))
-(acc::AccGeometricMean{T})(x) where {T} = (acc.n += 1; acc.sumlog += log(abs(x)); nothing)
+(acc::AccGeometricMean{T})(x) where {T} = (acc.n += 1; acc.sumlog += log(abs(x)); acc)
 
 # harmonic mean
 # see https://github.com/stdlib-js/stats/blob/main/incr/hmean/lib/main.js
@@ -95,7 +95,7 @@ mutable struct AccHarmonicMean{T} <: Accumulator{T}
 end
 
 (acc::AccHarmonicMean{T})() where {T} = (iszero(acc.n) ? one(T) : acc.n / acc.hmean)
-(acc::AccHarmonicMean{T})(x) where {T} = (acc.n += 1; acc.hmean += (one(T) / x); nothing)
+(acc::AccHarmonicMean{T})(x) where {T} = (acc.n += 1; acc.hmean += (one(T) / x); acc)
 
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
@@ -121,7 +121,7 @@ function (acc::AccMeanVar{T})(x) where {T}
     else
         acc.mean = x  # svar is zero already
     end
-    nothing
+    acc
 end
 
 # see https://www.johndcook.com/blog/skewness_kurtosis/
@@ -152,7 +152,7 @@ function (acc::AccStats{T})(x) where {T}
               4 * delta_n * acc.m3
     acc.m3 += term1 * delta_n * (n - 2) - 3 * delta_n * acc.m2
     acc.m2 += term1
-    nothing
+    acc
 end
 
 acc_count(acc::AccStats{T}) where {T} = acc.n
@@ -177,7 +177,7 @@ mutable struct AccExpWtMean{T} <: Accumulator{T}
 end
 
 (acc::AccExpWtMean{T})() where {T} = (acc.mean)
-(acc::AccExpWtMean{T})(x) where {T} = (acc.n += 1; acc.mean += acc.alpha * (x - acc.mean))
+(acc::AccExpWtMean{T})(x) where {T} = (acc.n += 1; acc.mean += acc.alpha * (x - acc.mean); acc)
 
 mutable struct AccExpWtMeanVar{T} <: Accumulator{T}
     n::Int
@@ -198,6 +198,7 @@ function (acc::AccExpWtMeanVar{T})(x) where {T}
     incr = acc.alpha * diff
     acc.mean += acc.alpha * (x - acc.mean)
     acc.svar = (one(T) - acc.alpha) * (acc.svar + diff * incr)
+    acc
 end
 
 # other derived
@@ -213,5 +214,4 @@ acc_mean(acc::AccExpWtMean{T}) where {T} = acc.mean
 acc_mean(acc::AccExpWtMeanVar{T}) where {T} = acc.mean
 acc_var(acc::AccExpWtMeanVar{T}) where {T} = acc.svar / (acc.n - 1)
 acc_std(acc::AccExpWtMeanVar{T}) where {T} = sqrt(acc_var(acc))
-
 
