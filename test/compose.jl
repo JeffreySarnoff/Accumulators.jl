@@ -40,4 +40,17 @@ end
     @test acc() ≐ harmmean(sortn8)
 end
    
+@testset "stats" begin
    
+end
+
+@testset "expwt" begin
+end
+
+#=
+ AccMeanVar,
+    AccStats,
+    AccExpWtMean, AccExpWtMeanVar,
+    acc_count, acc_mean, acc_var, acc_std, acc_skew, acc_kurt,
+    acc_midrange,
+=#
