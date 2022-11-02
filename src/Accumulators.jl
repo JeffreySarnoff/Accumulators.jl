@@ -1,6 +1,7 @@
 module Accumulators
 
 export Accumulator,
+    # Acc is a typed accumlator
     AccCount,
     AccMin, AccMax, AccExtrema,
     AccSum, AccProd,
