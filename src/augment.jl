@@ -191,6 +191,62 @@ function (acc::AccumStats{T})(x) where {T}
 end
 
 
+
+#=
+reference for AccExpWtMean, AccExpWtMeanVar
+Incremental calculation of weighted mean and variance
+by Tony Finch
+=#
+
+mutable struct AccumExpWtMean{T, F} <: Accumulator{T, F}
+    n::Int
+    alpha::T
+    mean::T
+    fn::F
+    AccumExpWtMean(::Type{T, F}=Float64, fn::F=identity; alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), fn)
+end
+
+(acc::AccumExpWtMean{T, F})() where {T, F} = acc.mean
+(acc::AccumExpWtMean{T, F})(x) where {T, F} = (acc.n += 1; acc.mean += acc.alpha * (x - acc.mean); acc)
+
+function (acc::AccumExpWtMean{T, F})(xs::Seq) where {T, F}
+    @inbounds for i ∈ eachindex(xs)
+        acc(xs[i])
+    end
+    acc
+end
+
+mutable struct AccumExpWtMeanVar{T, F} <: Accumulator{T, F}
+    n::Int
+    alpha::T
+    mean::T
+    svar::T
+    fn::F
+    AccumExpWtMeanVar(::Type{T, F}=Float64, fn::F=identity; alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), zero(T), fn)
+end
+
+function(acc::AccumExpWtMeanVar{T, F})() where {T, F}
+    unbiased_var = acc.svar / (acc.n = 1)
+    (acc.mean, unbiased_var)
+end
+
+function (acc::AccumExpWtMeanVar{T, F})(x) where {T, F}
+    xx = fn(T(x))
+    acc.n += 1
+    diff = xx - acc.mean
+    incr = acc.alpha * diff
+    acc.mean += acc.alpha * (xx - acc.mean)
+    acc.svar = (one(T) - acc.alpha) * (acc.svar + diff * incr)
+    acc
+end
+
+function (acc::AccumExpWtMeanVar{T, F})(xs::Seq) where {T, F}
+    @inbounds for i ∈ eachindex(xxs)
+        acc(xxs[i])
+    end
+    acc
+end
+
 acc_min(acc::AccumMin{T, F}) where {T, F} = acc.min
 acc_max(acc::AccumMax{T, F}) where {T, F} = acc.max
 
