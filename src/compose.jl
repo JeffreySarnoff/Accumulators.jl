@@ -5,7 +5,7 @@
      AccSum, AccProd,
      AccMean, AccMeanAbs, AccMeanAbs2, AccGeometricMean, AccHarmonicMean,
      AccMeanVar,
-     AccExpWMean, AccExpWMeanVar]
+     AccExpWtMean, AccExpWtMeanVar]
 =#
 
 mutable struct AccCount{T} <: Accumulator{T}
