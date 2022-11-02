@@ -1,9 +1,3 @@
-@inline function accvals(acc, vals)
-    for x in vals
-      acc(x)
-    end
-end
-
 @testset "simple accumulators" begin
    acc = AccCount()
    accvals(acc, one2five)
@@ -37,6 +31,13 @@ end
     accvals(acc, randn8)
     @test acc() == mean(randn8)
    
+    acc = AccGeometricMean()
+    accvals(acc, randn8)
+    @test acc() == geomean(map(abs,randn8))
+
+    acc = AccHarmonicMean()
+    accvals(acc, randn8)
+    @test acc() == harmmean(randn8)
 end
    
    
