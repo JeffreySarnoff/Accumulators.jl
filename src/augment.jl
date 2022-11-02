@@ -190,9 +190,32 @@ function (acc::AccumStats{T})(x) where {T}
     acc
 end
 
-acc_count(acc::AccumStats{T}) where {T} = acc.n
-acc_mean(acc::AccumStats{T}) where {T} = T(acc.m1)
-acc_var(acc::AccumStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
-acc_std(acc::AccumStats{T}) where {T} = T(sqrt(var(x)))
-acc_skew(acc::AccumStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-acc_kurt(acc::AccumStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
+
+acc_min(acc::AccumMin{T, F}) where {T, F} = acc.min
+acc_max(acc::AccumMax{T, F}) where {T, F} = acc.max
+
+acc_min(acc::AccumExtrema{T, F}) where {T, F} = acc.min
+acc_max(acc::AccumExtrema{T, F}) where {T, F} = acc.max
+acc_nmin(acc::AccumExtrema{T, F}) where {T, F} = acc.nmin
+acc_nmax(acc::AccumExtrema{T, F}) where {T, F} = acc.nmax
+acc_midrange(acc::AccumExtrema{T, F}) where {T, F} = (acc.max / 2) + (acc.min / 2)
+                                                                      
+acc_mean(acc::AccumStats{T, F}) where {T, F} = T(acc.m1)
+acc_var(acc::AccumStats{T, F}) where {T, F} = T(acc.m2 / (acc.n - 1))
+acc_std(acc::AccumStats{T, F}) where {T, F} = T(sqrt(var(x)))
+acc_skew(acc::AccumStats{T, F}) where {T, F} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+acc_kurt(acc::AccumStats{T, F}) where {T, F} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
+                                                                      
+acc_mean(acc::AccumMean{T, F}) where {T, F} = acc.mean
+acc_mean(acc::AccumGeometricMean{T, F}) where {T, F} = acc()
+acc_mean(acc::AccumHarmonicMean{T, F}) where {T, F} = acc()
+
+acc_mean(acc::AccumMeanVar{T, F}) where {T, F} = acc.mean
+acc_var(acc::AccumMeanVar{T, F}) where {T, F} = acc.svar / (acc.n - 1)
+acc_std(acc::AccumMeanVar{T, F}) where {T, F} = sqrt(acc.svar / (acc.n - 1))
+
+acc_mean(acc::AccumExpWtMean{T, F}) where {T, F} = acc.mean
+
+acc_mean(acc::AccumExpWtMeanVar{T, F}) where {T, F} = acc.mean
+acc_var(acc::AccumExpWtMeanVar{T, F}) where {T, F} = acc.svar / (acc.n - 1)
+acc_std(acc::AccumExpWtMeanVar{T, F}) where {T, F} = sqrt(acc_var(acc))
