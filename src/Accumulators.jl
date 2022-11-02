@@ -24,6 +24,7 @@ export Accumulator,
     AccumStats,
     AccumExpWtMean, AccumExpWtMeanVar
 
+using LoopVectorization: @turbo, @tturbo
 using VectorizedStatistics
 
 abstract type Accumulator{T} end
