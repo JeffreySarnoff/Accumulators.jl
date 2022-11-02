@@ -127,7 +127,6 @@ end
 
 # see https://www.johndcook.com/blog/skewness_kurtosis/
 
-
 mutable struct AccStats{T} <: Accumulator{T}
     n::Int
     m1::T
