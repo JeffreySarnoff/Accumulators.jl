@@ -211,7 +211,7 @@ end
 
 function (acc:AccStats{T})(xs::Seq) where {T}
     Σ = one(T)
-    @turbo for i ∈ eachindex(xs)
+    for i ∈ eachindex(xs)
         acc(xs[i])
     end
     acc
