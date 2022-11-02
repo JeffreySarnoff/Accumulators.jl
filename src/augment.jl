@@ -1,48 +1,79 @@
-mutable struct AccumCount{T,FN} <:  Accumulator{T}
+
+mutable struct AccumCount{T,F} <: Accumulator{T}
     n::T
-    const fn::FN
-    AccumCount(::Type{T}=Int64, fn::FN=identity) where {T,FN} = new{T,FN}(zero(T), fn)
+    const fn::F
+    AccumCount(::Type{T}=Int64, fn::F=identity) where {T,F} = new{T,F}(zero(T), fn)
 end
 
-(accum::AccumCount{T,FN})() where {T,FN} = (accum.n)
-(accum::AccumCount{T,FN})(x) where {T,FN} = (accum.n += accum.fn(one(T)); accum)
+(acc::AccumCount{T,F})() where {T,F} = acc.n
+(acc::AccumCount{T,F})(x) where {T,F} = (acc.n += fn(one(T)); acc)
+(acc::AccumCount{T,F})(xs::Seq) where {T,F} = (acc.n += fn(T(length(xs))); acc)
 
-mutable struct AccumMin{T,FN} <:  Accumulator{T}
+mutable struct AccumMin{T,F} <: Accumulator{T}
+    n::Int
     min::T
-    const fn::FN
-    AccumMin(::Type{T}=Float64, fn::FN=identity) where {T,FN} =
-        (T <: Integer) ? new{T,FN}(typemax(T), fn) : new{T,FN}(floatmax(T), fn)
+    const fn::F
+    AccumMin(::Type{T}=Float64, fn::F=identity) where {T,F} =
+        (T <: Integer) ? new{T,F}(0, typemax(T), fn) : new{T,F}(0, floatmax(T), fn)
 end
 
-(accum::AccumMin{T,FN})() where {T,FN} = (accum.min)
-(accum::AccumMin{T,FN})(x) where {T,FN} = (accum.min = ifelse(x < accum.min, accum.fn(T(x)), accum.min); accum)
+(acc::AccumMin{T,F})() where {T,F} = acc.min
+(acc::AccumMin{T,F})(x) where {T,F} = (acc.n +=1; acc.min = ifelse(x < acc.min, fn(T(x)), acc.min); acc)
+(acc::AccumMin{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vminimum(xs)); acc.min = ifelse(x < acc.min, fn(x), acc.min); acc)
 
-mutable struct AccumMax{T,FN} <:  Accumulator{T}
+mutable struct AccumMax{T,F} <: Accumulator{T}
+    n::Int
     max::T
-    const fn::FN
-    AccumMax(::Type{T}=Float64, fn::FN=identity) where {T,FN} =
-        (T <: Integer) ? new{T,FN}(typemin(T), fn) : new{T,FN}(floatmin(T), fn)
+    const fn::F
+    AccumMax(::Type{T}=Float64, fn::F=identity) where {T,F} =
+        (T <: Integer) ? new{T,F}(0, typemin(T), fn) : new{T,F}(0, floatmin(T), fn)
 end
 
-(accum::AccumMax{T,FN})() where {T,FN} = (accum.max)
-(accum::AccumMax{T,FN})(x) where {T,FN} = (accum.max = ifelse(accum.max < x, accum.fn(T(x)), accum.max); accum)
+(acc::AccumMax{T,F})() where {T,F} = acc.max
+(acc::AccumMax{T,F})(x) where {T,F} = (acc.n +=1; acc.min = ifelse(x < acc.min, fn(T(x)), acc.max); acc)
+(acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, fn(x), acc.max); acc)
 
-mutable struct AccumExtrema{T,FN} <:  Accumulator{T}
+mutable struct AccumExtrema{T,F} <: Accumulator{T}
+    n::Int
+    nmin::Int
+    nmax::Int
     min::T
     max::T
-    const fn::FN
-    AccumExtrema(::Type{T}=Float64, fn::FN=identity) where {T,FN} =
-        (T <: Integer) ? new{T,FN}(typemax(T), typemin(T), fn) : new{T,FN}(floatmax(T), floatmin(T), fn)
+    const fn::F
+    AccumExtrema(::Type{T}=Float64, fn::F=identity) where {T,F} =
+        (T <: Integer) ? new{T}(0, 0, 0, typemax(T), typemin(T), fn) : new{T}(0, 0, 0, floatmax(T), floatmin(T), fn)
 end
 
-(accum::AccumExtrema{T,FN})() where {T,FN} = (accum.min, accum.max)
-(accum::AccumExtrema{T,FN})(x) where {T,FN} = 
-    (accum.min = ifelse(x < accum.min, accum.fn(T(x)), accum.min); 
-     accum.max = ifelse(accum.max < x, fn(T(x)), accum.max); accum)
+(acc::AccumExtrema{T,F})() where {T,F} = (acc.min, acc.max)
 
-acc_min(accum::AccumExtrema{T,FN}) where {T,FN} = accum.min
-acc_max(accum::AccumExtrema{T,FN}) where {T,FN} = accum.max
-acc_midrange(accum::AccumExtrema{T,FN}) where {T,FN} = (accum.max / 2) + (accum.min / 2)
+function (acc::AccumExtrema{T,F})(x) where {T,F}
+    acc.n += 1
+    xx = fn(T(x))
+    if xx < acc.min
+       acc.nmin += 1
+       acc.min = xx
+    end
+    if xx > acc.max
+       acc.nmax += 1
+       acc.max = xx
+    end
+    acc
+ end
+ 
+function (acc::AccumExtrema{T,F})(xs::Seq) where {T,F}
+    acc.n += length(xs)
+    xxs = map(fn, xs)
+    mn, mx = map(T, vextrema(xxs))
+    if mn < acc.min
+       acc.nmin += 1
+       acc.min = mn
+    end
+    if mx > acc.max
+       acc.nmax += 1
+       acc.max = mx
+    end
+    acc
+end
 
 mutable struct AccumSum{T,FN} <:  Accumulator{T}
     sum::T
