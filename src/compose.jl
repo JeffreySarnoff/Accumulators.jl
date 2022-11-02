@@ -14,7 +14,7 @@ mutable struct AccCount{T} <: Accumulator{T}
 end
 
 (acc::AccCount{T})() where {T} = (acc.n)
-(acc::AccCount{T})(x) where {T} = (acc.n += one(T))
+(acc::AccCount{T})(x) where {T} = (acc.n += one(T); nothing)
 
 mutable struct AccMin{T} <: Accumulator{T}
     min::T
@@ -23,7 +23,7 @@ mutable struct AccMin{T} <: Accumulator{T}
 end
 
 (acc::AccMin{T})() where {T} = (acc.min)
-(acc::AccMin{T})(x) where {T} = (acc.min = ifelse(x < acc.min, T(x), acc.min))
+(acc::AccMin{T})(x) where {T} = (acc.min = ifelse(x < acc.min, T(x), acc.min); nothing)
 
 mutable struct AccMax{T} <: Accumulator{T}
     max::T
@@ -32,7 +32,7 @@ mutable struct AccMax{T} <: Accumulator{T}
 end
 
 (acc::AccMax{T})() where {T} = (acc.max)
-(acc::AccMax{T})(x) where {T} = (acc.max = ifelse(acc.max < x, T(x), acc.max))
+(acc::AccMax{T})(x) where {T} = (acc.max = ifelse(acc.max < x, T(x), acc.max); nothing)
 
 mutable struct AccExtrema{T} <: Accumulator{T}
     min::T
@@ -44,7 +44,7 @@ end
 (acc::AccExtrema{T})() where {T} = (acc.min, acc.max)
 (acc::AccExtrema{T})(x) where {T} = 
     (acc.min = ifelse(x < acc.min, T(x), acc.min);
-     acc.max = ifelse(acc.max < x, T(x), acc.max))
+     acc.max = ifelse(acc.max < x, T(x), acc.max); nothing)
 
 acc_max(acc::AccExtrema{T}) where {T} = acc.max
 acc_min(acc::AccExtrema{T}) where {T} = acc.min
@@ -56,7 +56,7 @@ mutable struct AccSum{T} <: Accumulator{T}
 end
 
 (acc::AccSum{T})() where {T} = (acc.sum)
-(acc::AccSum{T})(x) where {T} = (acc.sum += x)
+(acc::AccSum{T})(x) where {T} = (acc.sum += x; nothing)
 
 mutable struct AccProd{T} <: Accumulator{T}
     prod::T
@@ -64,7 +64,7 @@ mutable struct AccProd{T} <: Accumulator{T}
 end
 
 (acc::AccProd{T})() where {T} = (acc.prod)
-(acc::AccProd{T})(x) where {T} = (acc.prod *= x)
+(acc::AccProd{T})(x) where {T} = (acc.prod *= x; nothing)
 
 mutable struct AccMean{T} <: Accumulator{T}
     n::Int
@@ -74,7 +74,7 @@ end
 
 (acc::AccMean{T})() where {T} = (acc.mean)
 (acc::AccMean{T})(x) where {T} =
-    (acc.n += 1; acc.mean += (x - acc.mean) / acc.n)
+    (acc.n += 1; acc.mean += (x - acc.mean) / acc.n; nothing)
 
 # geometric mean (of abs(xs))
 # see https://github.com/stdlib-js/stats/blob/main/incr/gmean/lib/main.js
@@ -85,7 +85,7 @@ mutable struct AccGeometricMean{T} <: Accumulator{T}
 end
 
 (acc::AccGeometricMean{T})() where {T} = (iszero(acc.n) ? one(T) : exp(acc.sumlog / acc.n))
-(acc::AccGeometricMean{T})(x) where {T} = (acc.n += 1; acc.sumlog += log(abs(x)))
+(acc::AccGeometricMean{T})(x) where {T} = (acc.n += 1; acc.sumlog += log(abs(x)); nothing)
 
 # harmonic mean
 # see https://github.com/stdlib-js/stats/blob/main/incr/hmean/lib/main.js
@@ -96,7 +96,7 @@ mutable struct AccHarmonicMean{T} <: Accumulator{T}
 end
 
 (acc::AccHarmonicMean{T})() where {T} = (iszero(acc.n) ? one(T) : acc.n / acc.hmean)
-(acc::AccHarmonicMean{T})(x) where {T} = (acc.n += 1; acc.hmean += (one(T) / x))
+(acc::AccHarmonicMean{T})(x) where {T} = (acc.n += 1; acc.hmean += (one(T) / x); nothing)
 
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
@@ -122,6 +122,7 @@ function (acc::AccMeanVar{T})(x) where {T}
     else
         acc.mean = x  # svar is zero already
     end
+    nothing
 end
 
 # see https://www.johndcook.com/blog/skewness_kurtosis/
@@ -153,6 +154,7 @@ function (acc::AccStats{T})(x) where {T}
               4 * delta_n * acc.m3
     acc.m3 += term1 * delta_n * (n - 2) - 3 * delta_n * acc.m2
     acc.m2 += term1
+    nothing
 end
 
 acc_count(acc::AccStats{T}) where {T} = acc.n
