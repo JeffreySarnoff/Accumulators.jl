@@ -211,7 +211,7 @@ end
 
 function (acc::AccStats{T})(xs::Seq) where {T}
     Σ = one(T)
-    for i ∈ eachindex(xs)
+    @inbounds for i ∈ eachindex(xs)
         acc(xs[i])
     end
     acc
@@ -242,7 +242,7 @@ end
 (acc::AccExpWtMean{T})(x) where {T} = (acc.n += 1; acc.mean += acc.alpha * (x - acc.mean); acc)
 
 function (acc::AccExpWtMean{T})(xs::Seq) where {T}
-    @turbo for i ∈ eachindex(xs)
+    @inbounds for i ∈ eachindex(xs)
         acc(xs[i])
     end
     acc
@@ -271,7 +271,7 @@ function (acc::AccExpWtMeanVar{T})(x) where {T}
 end
 
 function (acc::AccExpWtMeanVar{T})(xs::Seq) where {T}
-    @turbo for i ∈ eachindex(xs)
+    @inbounds for i ∈ eachindex(xs)
         acc(xs[i])
     end
     acc
