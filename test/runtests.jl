@@ -1,3 +1,5 @@
+include("testvals.jl")
+
 @testset "compose" begin
     include("compose.jl")
 end
