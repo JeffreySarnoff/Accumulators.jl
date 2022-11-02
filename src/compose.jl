@@ -45,7 +45,9 @@ end
 (acc::AccExtrema{T})(x) where {T} = (acc.min = ifelse(x < acc.min, T(x), acc.min);
 acc.max = ifelse(acc.max < x, T(x), acc.max))
 
-acc_midrange(acc::AccExtrema{T})(x) where {T} = (acc.max / 2) + (acc.min / 2)
+(acc_max(acc::AccExtrema{T})() where {T} = acc.max
+(acc_min(acc::AccExtrema{T})() where {T} = acc.min
+(acc_midrange(acc::AccExtrema{T})() where {T} = (acc.max / 2) + (acc.min / 2)
 
 mutable struct AccSum{T} <: Accumulator{T}
     sum::T
