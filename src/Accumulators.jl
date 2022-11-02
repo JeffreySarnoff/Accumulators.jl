@@ -29,6 +29,8 @@ using VectorizedStatistics
 
 const Seq = Union{AbstractVector{T}, NTuple{N,T}} where {N,T}
 
+logabs(x) = log(abs(x))
+
 abstract type Accumulator{T} end
 
 include("compose.jl")
