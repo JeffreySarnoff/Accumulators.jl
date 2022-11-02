@@ -235,7 +235,7 @@ function (acc::AccExpWtMean{T})(xs::Seq) where {T}
     end
     acc
 end
-                                                  
+
 mutable struct AccExpWtMeanVar{T} <: Accumulator{T}
     n::Int
     alpha::T
