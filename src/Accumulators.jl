@@ -1,17 +1,28 @@
 module Accumulators
 
 export Accumulator,
+    AccCount,
+    AccMin, AccMax, AccExtrema,
+    AccSum, AccProd,
+    AccMean, AccGeometricMean, AccHarmonicMean,
+    AccMeanVar,
+    AccStats,
+    AccExpWtMean, AccExpWtMeanVar
+    AccMinAbs, AccMinAbs2, AccMaxAbs, AccMaxAbs2,
+    AccSumAbs, AccSumAbs2, AccProdAbs, AccProdAbs2, 
+    AccMeanAbs, AccMeanAbs2, AccMeanVarAbs, AccMeanVarAbs2,
+    # acc_ are convienice getters for appropriate accumulators
+    acc_count, acc_mean, acc_var, acc_std, acc_skew, acc_kurt,
+    acc_midrange,
+    # Accum is Acc with a specified function applied to each new 'x'
     AccumCount,
-    AccumMin, AccumMax, 
-    AccumExtrema, acc_midrange,
+    AccumMin, AccumMax, AccumExtrema,
     AccumSum, AccumProd,
     AccumMean, AccumGeometricMean, AccumHarmonicMean,
     AccumMeanVar,
-    AccMinAbs, AccMaxAbs, AccMeanAbs, AccMeanAbs2,
-    AccSumAbs, AccProdAbs, 
-    AccMeanVarAbs, AccMeanVarAbs2, 
-    AccStats, acc_count, acc_mean, acc_var, acc_std, acc_skew, acc_kurt,
-    AccExpWtMean, AccExpWtMeanVar
+    AccumStats,
+    AccumExpWtMean, AccumExpWtMeanVar
+
 
 abstract type Accumulator{T} end
 
