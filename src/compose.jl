@@ -203,7 +203,8 @@ end
 
 function (acc::AccStats{T})() where {T}
     (acc.acc_count(), acc.acc_mean(), acc.acc_var(), acc.acc_std(), acc.acc_skew(), acc.acc_kurt())
-
+end
+                                                  
 function (acc::AccStats{T})(x) where {T}
     n1 = acc.n
     acc.n += 1
