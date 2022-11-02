@@ -126,3 +126,41 @@ function (accum::AccumMeanVar{T,FN})(x) where {T,FN}
     accum()
 end
 
+# see https://www.johndcook.com/blog/skewness_kurtosis/
+
+mutable struct AccumStats{T,FN} <: Accumulator{T}
+    n::Int
+    m1::T
+    m2::T
+    m3::T
+    m4::T
+    const fn::FN
+    AccumStats(::Type{T}=Float64, fn::FN=identity) where {T} = new{T}(0, zero(T), zero(T), zero(T), zero(T), fn)
+end
+
+function (acc::AccumStats{T})() where {T}
+    (acc.acc_count(), acc.acc_mean(), acc.acc_var(), acc.acc_std(), acc.acc_skew(), acc.acc_kurt())
+end
+
+function (acc::AccumStats{T})(x) where {T}
+    n1 = acc.n
+    acc.n += 1
+    delta = acc.fn(x) - acc.m1
+    delta_n = delta / acc.n
+    delta_n2 = delta_n^2
+    term1 = delta * delta_n * n1
+    acc.m1 += delta_n
+    acc.m4 += term1 * delta_n2 * (acc.n^2 - 3*acc.n + 3) + 
+              6 * delta_2 * acc.m2 - 
+              4 * delta_n * acc.m3
+    acc.m3 += term1 * delta_n * (n - 2) - 3 * delta_n * acc.m2
+    acc.m2 += term1
+    nothing
+end
+
+acc_count(acc::AccStats{T}) where {T} = acc.n
+acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
+acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
+acc_std(acc::AccStats{T}) where {T} = T(sqrt(var(x)))
+acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
