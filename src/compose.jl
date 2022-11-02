@@ -284,7 +284,7 @@ end
 
 # other derived
 
-acc_count(@nospecialize acc::Accumulator) = acc.n
+acc_count(@nospecialize(acc::Accumulator{T})) where {T} = acc.n
 
 acc_min(acc::AccMin{T}) where {T} = acc.min
 acc_max(acc::AccMax{T}) where {T} = acc.max
