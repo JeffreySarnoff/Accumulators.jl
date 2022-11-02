@@ -217,7 +217,7 @@ function (acc::AccStats{T})(x) where {T}
 
     acc
 end
-                                               
+
 function (acc::AccStats{T})(xs::Seq) where {T}
     Σ = one(T)
     @inbounds for i ∈ eachindex(xs)
@@ -232,7 +232,7 @@ reference for AccExpWtMean, AccExpWtMeanVar
 Incremental calculation of weighted mean and variance
 by Tony Finch
 =#
-                           
+
 mutable struct AccExpWtMean{T} <: Accumulator{T}
     n::Int
     alpha::T
