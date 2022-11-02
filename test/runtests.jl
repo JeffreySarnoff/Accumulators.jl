@@ -1,3 +1,5 @@
+using Accumulators, StatsBase, Test
+
 include("testvals.jl")
 
 @testset "compose" begin
