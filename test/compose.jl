@@ -21,6 +21,6 @@
    for x in sortn8
        acc(x)
    end
-   @test acc() == (sortn8[1], sortn8[end]
+   @test acc() == (sortn8[1], sortn8[end])
 end
 
