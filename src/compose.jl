@@ -20,7 +20,7 @@ mutable struct AccMin{T} <: Accumulator{T}
     n::Int
     min::T
     AccMin(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemax(T)) : new{T}(0, floatmax(T))
+        (T <: Integer) ? new{T}(typemax(T)) : new{T}(0, 0, floatmax(T))
 end
 
 (acc::AccMin{T})() where {T} = (acc.min)
