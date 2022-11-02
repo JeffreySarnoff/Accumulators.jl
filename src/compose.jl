@@ -186,10 +186,6 @@ function (acc::AccMeanVar{T})(xs::Seq) where {T}
     acc
 end
 
-acc_mean(acc::AccMeanVar{T}) where {T} = T(acc.m1)
-acc_var(acc::AccMeanVar{T}) where {T} = T(acc.m2 / (acc.n - 1))
-acc_std(acc::AccMeanVar{T}) where {T} = sqrt(acc_var(acc))
-
 # see https://www.johndcook.com/blog/skewness_kurtosis/
 
 mutable struct AccStats{T} <: Accumulator{T}
