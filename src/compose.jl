@@ -47,9 +47,13 @@ end
 (acc::AccExtrema{T})(x) where {T} = 
     (acc.min = ifelse(x < acc.min, T(x), acc.min);
      acc.max = ifelse(acc.max < x, T(x), acc.max); acc)
-(acc::AccExtrema{T})(xs::Seq) where {T} = (mn,mx = map(T,vminimum(xs)); 
-     acc.min = ifelse(mn < acc.min, mn, acc.min);
-     acc.max = ifelse(mx > acc.max, mx, acc.max); acc)
+
+function (acc::AccExtrema{T})(xs::Seq) where {T}
+   mn, mx = map(T, vminimum(xs))
+   acc.min = ifelse(mn < acc.min, mn, acc.min)
+   acc.max = ifelse(mx > acc.max, mx, acc.max)
+   acc
+end
 
 acc_max(acc::AccExtrema{T}) where {T} = acc.max
 acc_min(acc::AccExtrema{T}) where {T} = acc.min
