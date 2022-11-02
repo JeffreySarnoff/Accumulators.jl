@@ -80,7 +80,7 @@ function (acc:AccProd{T})(xs::Seq)
     acc.prod *= Σ
     acc
 end
-                    
+             
 mutable struct AccMean{T} <: Accumulator{T}
     n::Int
     mean::T
@@ -101,7 +101,8 @@ mutable struct AccGeometricMean{T} <: Accumulator{T}
 end
 
 (acc::AccGeometricMean{T})() where {T} = (iszero(acc.n) ? one(T) : exp(acc.sumlog / acc.n))
-(acc::AccGeometricMean{T})(x) where {T} = (acc.n += 1; acc.sumlog += log(abs(x)); acc)
+(acc::AccGeometricMean{T})(x) where {T} = (acc.n += 1; acc.sumlog += logabs(x); acc)
+(acc::AccGeometricMean{T})(xs::Seq) = (acc.n += length(xs); s = sumlogabs(xs); acc.sumlog += s; acc)
 
 # harmonic mean
 # see https://github.com/stdlib-js/stats/blob/main/incr/hmean/lib/main.js
@@ -113,6 +114,7 @@ end
 
 (acc::AccHarmonicMean{T})() where {T} = (iszero(acc.n) ? one(T) : acc.n / acc.hmean)
 (acc::AccHarmonicMean{T})(x) where {T} = (acc.n += 1; acc.hmean += (one(T) / x); acc)
+(acc::AccHarmonicMean{T})(xs::Seq) = (acc.n += length(xs); s = vsum(map(x->one(T)/x, xs)); acc.hmean += s; acc)
 
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
@@ -141,6 +143,22 @@ function (acc::AccMeanVar{T})(x) where {T}
     acc
 end
 
+function (acc:AccMeanVar{T})(xs::Seq)
+    n = length(xs)
+    m = vmean(xs)
+    # v = vvar(xs)
+    # s = v * (n - 1)
+    acc.n += n
+    if !iszero(acc.n)
+        oldmean = acc.mean
+        acc.mean = oldmean + (m - oldmean) / acc.n
+        acc.svar = acc.svar + (m - oldmean) * (m - acc.mean)
+    else
+        acc.mean = m
+    end                                              
+    acc
+end
+                                        
 # see https://www.johndcook.com/blog/skewness_kurtosis/
 
 mutable struct AccStats{T} <: Accumulator{T}
