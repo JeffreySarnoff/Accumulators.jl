@@ -197,7 +197,7 @@ Incremental calculation of weighted mean and variance
 by Tony Finch
 =#
 
-mutable struct AccumExpWtMean{T, F} <: Accumulator{T, F}
+mutable struct AccumExpWtMean{T, F} <: Accumulator{T}
     n::Int
     alpha::T
     mean::T
@@ -215,7 +215,7 @@ function (acc::AccumExpWtMean{T, F})(xs::Seq) where {T, F}
     acc
 end
 
-mutable struct AccumExpWtMeanVar{T, F} <: Accumulator{T, F}
+mutable struct AccumExpWtMeanVar{T, F} <: Accumulator{T}
     n::Int
     alpha::T
     mean::T
