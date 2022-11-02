@@ -202,7 +202,7 @@ mutable struct AccumExpWtMean{T, F} <: Accumulator{T}
     alpha::T
     mean::T
     fn::F
-    AccumExpWtMean(::Type{T, F}=Float64, fn::F=identity; alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), fn)
+    AccumExpWtMean(::Type{T}=Float64, fn::F=identity; alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), fn)
 end
 
 (acc::AccumExpWtMean{T, F})() where {T, F} = acc.mean
@@ -221,7 +221,7 @@ mutable struct AccumExpWtMeanVar{T, F} <: Accumulator{T}
     mean::T
     svar::T
     fn::F
-    AccumExpWtMeanVar(::Type{T, F}=Float64, fn::F=identity; alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), zero(T), fn)
+    AccumExpWtMeanVar(::Type{T}=Float64, fn::F=identity; alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), zero(T), fn)
 end
 
 function(acc::AccumExpWtMeanVar{T, F})() where {T, F}
