@@ -27,6 +27,8 @@ export Accumulator,
 using LoopVectorization: @turbo, @tturbo
 using VectorizedStatistics
 
+const Seq = Union{AbstractVector{T}, NTuple{N,T}} where {N,T}
+
 abstract type Accumulator{T} end
 
 include("compose.jl")
