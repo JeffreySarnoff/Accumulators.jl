@@ -1,4 +1,4 @@
-@testset "simple accumulators" beg
+@testset "simple accumulators" begin
 
 end
 
