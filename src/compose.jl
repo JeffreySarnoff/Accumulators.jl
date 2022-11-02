@@ -209,9 +209,9 @@ function (acc::AccStats{T})(x) where {T}
     acc
 end
 
-function (acc:AccStats{T})(xs::Seq) where {T}
+function (acc::AccStats{T})(xs::Seq) where {T}
     Σ = one(T)
-    for i ∈ eachindex(xs)
+    @turbo for i ∈ eachindex(xs)
         acc(xs[i])
     end
     acc
