@@ -182,18 +182,30 @@ function (acc::AccStats{T})() where {T}
 end
 
 function (acc::AccStats{T})(x) where {T}
-    n1 = acc.n
-    acc.n += 1
-    delta = x - acc.m1
-    delta_n = delta / acc.n
-    delta_n2 = delta_n^2
+    accn = acc.n
+    accm1 = acc.m1
+    accm2 = acc.m2
+    accm3 = acc.m3
+    accm4 = acc.m4
+                                                  
+    n1 = accn
+    accn += 1
+    delta = x - accm1
+    delta_n = delta / accn
+    delta_n2 = delta_n * delta_n
     term1 = delta * delta_n * n1
-    acc.m1 += delta_n
-    acc.m4 += term1 * delta_n2 * (acc.n^2 - 3*acc.n + 3) + 
-              6 * delta_2 * acc.m2 - 
-              4 * delta_n * acc.m3
-    acc.m3 += term1 * delta_n * (n - 2) - 3 * delta_n * acc.m2
-    acc.m2 += term1
+    accm1 += delta_n
+    accm4 += term1 * delta_n2 * (accn * accn - 3*accn + 3) + 
+              6 * delta_2 * accm2 - 
+              4 * delta_n * accm3
+    accm3 += term1 * delta_n * (n - 2) - 3 * delta_n * accm2
+    accm2 += term1
+
+    acc.n = accn
+    acc.m1 = accm1
+    acc.m2 = accm2
+    acc.m3 = accm3
+    acc.m4 = accm4
     acc
 end
 
