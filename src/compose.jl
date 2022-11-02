@@ -39,25 +39,41 @@ end
 (acc::AccMax{T})(xs::Seq) where {T} = (acc.n += length(xs); x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, x, acc.max); acc)
 
 mutable struct AccExtrema{T} <: Accumulator{T}
-    n::T
+    n::Int
+    nmin::Int
+    nmax::Int
     min::T
     max::T
     AccExtrema(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemax(T), typemin(T)) : new{T}(0, floatmax(T), floatmin(T))
+        (T <: Integer) ? new{T}(0, 0, 0, typemax(T), typemin(T)) : new{T}(0, 0, 0, floatmax(T), floatmin(T))
 end
 
 (acc::AccExtrema{T})() where {T} = (acc.min, acc.max)
-(acc::AccExtrema{T})(x) where {T} = 
-    (acc.n +=1;
-     acc.min = ifelse(x < acc.min, T(x), acc.min);
-     acc.max = ifelse(acc.max < x, T(x), acc.max); acc)
-
+function (acc::AccExtrema{T})(x) where {T}
+    acc.n += 1
+    if x < acc.min
+       acc.nmin += 1
+       acc.min = x
+    end
+    if x > acc.max
+       acc.nmax += 1
+       acc.max = x
+    end
+    acc
+ end
+ 
 function (acc::AccExtrema{T})(xs::Seq) where {T}
-   acc.n += length(xs)
-   mn, mx = map(T, vminimum(xs))
-   acc.min = ifelse(mn < acc.min, mn, acc.min)
-   acc.max = ifelse(mx > acc.max, mx, acc.max)
-   acc
+    acc.n += length(xs)
+    mn, mx = map(T, vminimum(xs))
+    if mn < acc.min
+       acc.nmin += 1
+       acc.min = mn
+    end
+    if mx > acc.max
+       acc.nmax += 1
+       acc.max = mx
+    end
+    acc
 end
 
 mutable struct AccSum{T} <: Accumulator{T}
@@ -275,6 +291,8 @@ acc_max(acc::AccMax{T}) where {T} = acc.max
 
 acc_min(acc::AccExtrema{T}) where {T} = acc.min
 acc_max(acc::AccExtrema{T}) where {T} = acc.max
+acc_nmin(acc::AccExtrema{T}) where {T} = acc.nmin
+acc_nmax(acc::AccExtrema{T}) where {T} = acc.nmax
 acc_midrange(acc::AccExtrema{T}) where {T} = (acc.max / 2) + (acc.min / 2)
                                                                       
 acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
