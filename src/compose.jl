@@ -150,7 +150,7 @@ function (acc::AccMeanVar{T})(x) where {T}
     acc
 end
 
-function (acc:AccMeanVar{T})(xs::Seq) where {T}
+function (acc::AccMeanVar{T})(xs::Seq) where {T}
     n = length(xs)
     m = vmean(xs)
     # v = vvar(xs)
@@ -229,7 +229,7 @@ end
 (acc::AccExpWtMean{T})() where {T} = (acc.mean)
 (acc::AccExpWtMean{T})(x) where {T} = (acc.n += 1; acc.mean += acc.alpha * (x - acc.mean); acc)
 
-function (acc:AccExpWtMean{T})(xs::Seq) where {T}
+function (acc::AccExpWtMean{T})(xs::Seq) where {T}
     @turbo for i ∈ eachindex(xs)
         acc(xs[i])
     end
@@ -258,7 +258,7 @@ function (acc::AccExpWtMeanVar{T})(x) where {T}
     acc
 end
 
-function (acc:AccExpWtMeanVar{T})(xs::Seq) where {T}
+function (acc::AccExpWtMeanVar{T})(xs::Seq) where {T}
     @turbo for i ∈ eachindex(xs)
         acc(xs[i])
     end
