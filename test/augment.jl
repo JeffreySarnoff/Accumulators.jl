@@ -5,15 +5,15 @@
   
    acc = AccumMin(fn=abs2)
    accvals(acc, sortn8)
-   @test acc() == abs2(sortn8[1])
+   @test acc() == minimum(map(abs2, sortn8))
   
    acc = AccumMax(fn=abs2)
    accvals(acc, sortn8)
-   @test acc() == abs2(sortn8[end])
+   @test acc() == maximum(map(abs2, sortn8))
 
    acc = AccumExtrema(fn=abs2)
    accvals(acc, sortn8)
-   @test acc() == (abs2(sortn8[1]), abs2(sortn8[end]))
+   @test acc() == (minimum(map(abs2, sortn8)), maximum(map(abs2, sortn8)))
 end
 
 @testset "sum, prod" begin
