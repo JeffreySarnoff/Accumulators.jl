@@ -1,8 +1,4 @@
 @testset "simple accumulators" begin
-   acc = AccumCount(fn=abs2)
-   accvals(acc, one2five)
-   @test acc() == 5*5
-  
    acc = AccumMin(fn=abs2)
    accvals(acc, sortn8)
    @test acc() == minimum(map(abs2, sortn8))
