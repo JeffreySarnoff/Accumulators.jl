@@ -1,13 +1,3 @@
-mutable struct AccumCount{T,F} <: Accumulator{T}
-    n::T
-    const fn::F
-    AccumCount(::Type{T}=Int64; fn::F=identity) where {T,F<:Function} = new{T,F}(zero(T), fn)
-end
-
-(acc::AccumCount{T,F})() where {T,F} = acc.n
-(acc::AccumCount{T,F})(x) where {T,F} = (acc.n += acc.fn(one(T)); acc)
-(acc::AccumCount{T,F})(xs::Seq) where {T,F} = (acc.n += acc.fn(T(length(xs))); acc)
-
 mutable struct AccumMin{T,F} <: Accumulator{T}
     n::Int
     min::T
