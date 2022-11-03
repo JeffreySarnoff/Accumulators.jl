@@ -1,8 +1,7 @@
 mutable struct AccumCount{T,F} <: Accumulator{T}
     n::T
     const fn::F
-    AccumCount(::Type{T}=Int64, fn::F=identity) where {T,F<:Function} = new{T,F}(zero(T), fn)
-    AccumCount(fn::F=identity, ::Type{T}=Int64) where {T,F<:Function} = new{T,F}(zero(T), fn)
+    AccumCount(::Type{T}=Int64; fn::F=identity) where {T,F<:Function} = new{T,F}(zero(T), fn)
 end
 
 (acc::AccumCount{T,F})() where {T,F} = acc.n
@@ -13,9 +12,7 @@ mutable struct AccumMin{T,F} <: Accumulator{T}
     n::Int
     min::T
     const fn::F
-    AccumMin(::Type{T}=Float64, fn::F=identity) where {T,F<:Function} =
-        (T <: Integer) ? new{T,F}(0, typemax(T), fn) : new{T,F}(0, floatmax(T), fn)
-    AccumMin(fn::F=identity, ::Type{T}=Float64) where {T,F<:Function} =
+    AccumMin(::Type{T}=Float64; fn::F=identity) where {T,F<:Function} =
         (T <: Integer) ? new{T,F}(0, typemax(T), fn) : new{T,F}(0, floatmax(T), fn)
 end
 
@@ -27,9 +24,7 @@ mutable struct AccumMax{T,F} <: Accumulator{T}
     n::Int
     max::T
     const fn::F
-    AccumMax(::Type{T}=Float64, fn::F=identity) where {T,F} =
-        (T <: Integer) ? new{T,F}(0, typemin(T), fn) : new{T,F}(0, floatmin(T), fn)
-    AccumMax(fn::F=identity, ::Type{T}=Float64) where {T,F} =
+    AccumMax(::Type{T}=Float64; fn::F=identity) where {T,F} =
         (T <: Integer) ? new{T,F}(0, typemin(T), fn) : new{T,F}(0, floatmin(T), fn)
 end
 
@@ -44,7 +39,7 @@ mutable struct AccumExtrema{T,F} <: Accumulator{T}
     min::T
     max::T
     const fn::F
-    AccumExtrema(::Type{T}=Float64, fn::F=identity) where {T,F} =
+    AccumExtrema(::Type{T}=Float64; fn::F=identity) where {T,F} =
         (T <: Integer) ? new{T, F}(0, 0, 0, typemax(T), typemin(T), fn) : new{T, F}(0, 0, 0, floatmax(T), floatmin(T), fn)
 end
 
@@ -83,7 +78,7 @@ mutable struct AccumSum{T,FN} <:  Accumulator{T}
     n::Int
     sum::T
     const fn::FN
-    AccumSum(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T, FN}(0, zero(T), fn)
+    AccumSum(::Type{T}=Float64; fn::FN=identity) where {T,FN} = new{T, FN}(0, zero(T), fn)
 end
 
 (accum::AccumSum{T,FN})() where {T,FN} = accum.sum
@@ -94,7 +89,7 @@ mutable struct AccumProd{T,FN} <:  Accumulator{T}
     n::Int
     prod::T
     const fn::FN
-    AccumProd(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T, FN}(0, one(T), fn)
+    AccumProd(::Type{T}=Float64; fn::FN=identity) where {T,FN} = new{T, FN}(0, one(T), fn)
 end
 
 (accum::AccumProd{T,FN})() where {T,FN} = accum.prod
@@ -105,7 +100,7 @@ mutable struct AccumMean{T,FN} <:  Accumulator{T}
     n::Int
     mean::T
     const fn::FN
-    AccumMean(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), fn)
+    AccumMean(::Type{T}=Float64; fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), fn)
 end
 
 (accum::AccumMean{T,FN})() where {T,FN} = (accum.mean)
@@ -119,7 +114,7 @@ mutable struct AccumGeometricMean{T,FN} <:  Accumulator{T}
     n::Int
     sumlog::T
     const fn::FN
-    AccumGeometricMean(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), fn)
+    AccumGeometricMean(::Type{T}=Float64; fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), fn)
 end
 
 (accum::AccumGeometricMean{T,FN})() where {T,FN} = (iszero(accum.n) ? one(T) : exp(accum.sumlog / accum.n))
@@ -132,7 +127,7 @@ mutable struct AccumHarmonicMean{T,FN} <:  Accumulator{T}
     n::Int
     hmean::T
     const fn::FN
-    AccumHarmonicMean(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), fn)
+    AccumHarmonicMean(::Type{T}=Float64; fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), fn)
 end
 
 (accum::AccumHarmonicMean{T})() where {T} = (iszero(accum.n) ? one(T) : accum.n / accum.hmean)
@@ -147,7 +142,7 @@ mutable struct AccumMeanVar{T,FN} <: Accumulator{T}
     mean::T
     svar::T
     const fn::FN
-    AccumMeanVar(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), zero(T), fn)
+    AccumMeanVar(::Type{T}=Float64; fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), zero(T), fn)
 end
 
 function (accum::AccumMeanVar{T,FN})() where {T,FN}
@@ -178,7 +173,7 @@ mutable struct AccumStats{T,FN} <: Accumulator{T}
     m3::T
     m4::T
     const fn::FN
-    AccumStats(::Type{T}=Float64, fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), zero(T), zero(T), zero(T), fn)
+    AccumStats(::Type{T}=Float64; fn::FN=identity) where {T,FN} = new{T,FN}(0, zero(T), zero(T), zero(T), zero(T), fn)
 end
 
 function (acc::AccumStats{T})() where {T}
@@ -220,7 +215,7 @@ mutable struct AccumExpWtMean{T, F} <: Accumulator{T}
     alpha::T
     mean::T
     fn::F
-    AccumExpWtMean(::Type{T}=Float64, fn::F=identity; alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), fn)
+    AccumExpWtMean(::Type{T}=Float64; fn::F=identity, alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), fn)
 end
 
 (acc::AccumExpWtMean{T, F})() where {T, F} = acc.mean
@@ -240,7 +235,7 @@ mutable struct AccumExpWtMeanVar{T, F} <: Accumulator{T}
     mean::T
     svar::T
     fn::F
-    AccumExpWtMeanVar(::Type{T}=Float64, fn::F=identity; alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), zero(T), fn)
+    AccumExpWtMeanVar(::Type{T}=Float64; fn::F=identity, alpha::T=0.5) where {T, F} = new{T, F}(0, alpha, zero(T), zero(T), fn)
 end
 
 function(acc::AccumExpWtMeanVar{T, F})() where {T, F}
