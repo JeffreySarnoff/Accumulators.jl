@@ -1,43 +1,43 @@
 @testset "simple accumulators" begin
-   acc = AccumCount()
+   acc = AccumCount(fn=abs2)
    accvals(acc, one2five)
-   @test acc() == 5
+   @test acc() == 5*5
   
-   acc = AccumMin()
+   acc = AccumMin(fn=abs2)
    accvals(acc, sortn8)
-   @test acc() == sortn8[1]
+   @test acc() == abs2(sortn8[1])
   
-   acc = AccumMax()
+   acc = AccumMax(fn=abs2)
    accvals(acc, sortn8)
-   @test acc() == sortn8[end]
+   @test acc() == abs2(sortn8[end])
 
-   acc = AccumExtrema()
+   acc = AccumExtrema(fn=abs2)
    accvals(acc, sortn8)
-   @test acc() == (sortn8[1], sortn8[end])
+   @test acc() == (abs2(sortn8[1]), abs2(sortn8[end]))
 end
 
 @testset "sum, prod" begin
-    acc = AccumSum()
+    acc = AccumSum(fn=abs2)
     accvals(acc, sortn8)
-    @test acc() == foldl(+, sortn8; init=0.0)
+    @test acc() == foldl(+, map(abs2,sortn8); init=0.0)
 
-    acc = AccumProd()
+    acc = AccumProd(fn=abs2)
     accvals(acc, sortn8)
-    @test acc() == foldl(*, sortn8; init=1.0)
+    @test acc() == foldl(*, map(abs2,sortn8); init=1.0)
 end
 
 @testset "means" begin
-    acc = AccumMean()
+    acc = AccumMean(fn=abs2)
     accvals(acc, sortn8)
-    @test acc() ≐ mean(sortn8)
+    @test acc() ≐ mean(map(abs2,sortn8))
    
-    acc = AccumGeometricMean()
+    acc = AccumGeometricMean(fn=abs2)
     accvals(acc, sortn8)
-    @test acc() ≐ geomean(map(abs, sortn8))
+    @test acc() ≐ geomean(map(abs2, sortn8))
 
-    acc = AccumHarmonicMean()
+    acc = AccumHarmonicMean(fn=abs2)
     accvals(acc, sortn8)
-    @test acc() ≐ harmmean(sortn8)
+    @test acc() ≐ harmmean(map(abs2,sortn8))
 end
    
 @testset "stats" begin
