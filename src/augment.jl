@@ -5,8 +5,8 @@ mutable struct AccumCount{T,F} <: Accumulator{T}
 end
 
 (acc::AccumCount{T,F})() where {T,F} = acc.n
-(acc::AccumCount{T,F})(x) where {T,F} = (acc.n += fn(one(T)); acc)
-(acc::AccumCount{T,F})(xs::Seq) where {T,F} = (acc.n += fn(T(length(xs))); acc)
+(acc::AccumCount{T,F})(x) where {T,F} = (acc.n += acc.fn(one(T)); acc)
+(acc::AccumCount{T,F})(xs::Seq) where {T,F} = (acc.n += acc.fn(T(length(xs))); acc)
 
 mutable struct AccumMin{T,F} <: Accumulator{T}
     n::Int
@@ -17,8 +17,8 @@ mutable struct AccumMin{T,F} <: Accumulator{T}
 end
 
 (acc::AccumMin{T,F})() where {T,F} = acc.min
-(acc::AccumMin{T,F})(x) where {T,F} = (acc.n += 1; acc.min = ifelse(x < acc.min, fn(T(x)), acc.min); acc)
-(acc::AccumMin{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vminimum(xs)); acc.min = ifelse(x < acc.min, fn(x), acc.min); acc)
+(acc::AccumMin{T,F})(x) where {T,F} = (acc.n += 1; acc.min = ifelse(x < acc.min, acc.fn(T(x)), acc.min); acc)
+(acc::AccumMin{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vminimum(xs)); acc.min = ifelse(x < acc.min, acc.fn(x), acc.min); acc)
 
 mutable struct AccumMax{T,F} <: Accumulator{T}
     n::Int
@@ -29,8 +29,8 @@ mutable struct AccumMax{T,F} <: Accumulator{T}
 end
 
 (acc::AccumMax{T,F})() where {T,F} = acc.max
-(acc::AccumMax{T,F})(x) where {T,F} = (acc.n += 1; acc.min = ifelse(x < acc.min, fn(T(x)), acc.max); acc)
-(acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, fn(x), acc.max); acc)
+(acc::AccumMax{T,F})(x) where {T,F} = (acc.n += 1; acc.min = ifelse(x < acc.min, acc.fn(T(x)), acc.max); acc)
+(acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, acc.fn(x), acc.max); acc)
 
 mutable struct AccumExtrema{T,F} <: Accumulator{T}
     n::Int
@@ -47,7 +47,7 @@ end
 
 function (acc::AccumExtrema{T,F})(x) where {T,F}
     acc.n += 1
-    xx = fn(T(x))
+    xx = acc.fn(T(x))
     if xx < acc.min
        acc.nmin += 1
        acc.min = xx
@@ -152,7 +152,7 @@ end
 
 function (accum::AccumMeanVar{T,FN})(x) where {T,FN}
     if !iszero(accum.n)
-        x = fn(x)
+        x = acc.fn(x)
         oldmean = accum.mean
         accum.mean = accum.fn(oldmean + (x - oldmean) / accum.n)
         accum.svar = accum.svar + (x - oldmean) * (x - accum.mean)
@@ -244,7 +244,7 @@ function(acc::AccumExpWtMeanVar{T, F})() where {T, F}
 end
 
 function (acc::AccumExpWtMeanVar{T, F})(x) where {T, F}
-    xx = fn(T(x))
+    xx = acc.fn(T(x))
     acc.n += 1
     diff = xx - acc.mean
     incr = acc.alpha * diff
