@@ -19,7 +19,7 @@ mutable struct AccumMax{T,F} <: Accumulator{T}
 end
 
 (acc::AccumMax{T,F})() where {T,F} = acc.max
-(acc::AccumMax{T,F})(x) where {T,F} = (acc.n += 1; acc.min = ifelse(x < acc.min, acc.fn(T(x)), acc.max); acc)
+(acc::AccumMax{T,F})(x) where {T,F} = (acc.n += 1; acc.max = ifelse(x > acc.max, acc.fn(T(x)), acc.max); acc)
 (acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, acc.fn(x), acc.max); acc)
 
 mutable struct AccumExtrema{T,F} <: Accumulator{T}
