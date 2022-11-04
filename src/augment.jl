@@ -7,8 +7,8 @@ mutable struct AccumMin{T,F} <: Accumulator{T}
 end
 
 (acc::AccumMin{T,F})() where {T,F} = acc.min
-(acc::AccumMin{T,F})(x) where {T,F} = (acc.n += 1; xx = acc.fn(T(x)); acc.min = ifelse(xx < acc.min, xx, acc.min); acc)
-(acc::AccumMin{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vminimum(map(acc.fn,xs))); acc.min = ifelse(x < acc.min, acc.fn(x), acc.min); acc)
+(acc::AccumMin{T,F})(x) where {T,F} = (acc.n += 1; xx = T(acc.fn(x)); acc.min = ifelse(xx < acc.min, xx, acc.min); acc)
+(acc::AccumMin{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); xxs = map(a->T(acc.fn(a)), xs); x = vminimum(xxs); acc.min = ifelse(x < acc.min, x, acc.min); acc)
 
 mutable struct AccumMax{T,F} <: Accumulator{T}
     n::Int
@@ -19,8 +19,8 @@ mutable struct AccumMax{T,F} <: Accumulator{T}
 end
 
 (acc::AccumMax{T,F})() where {T,F} = acc.max
-(acc::AccumMax{T,F})(x) where {T,F} = (acc.n += 1; acc.max = ifelse(x > acc.max, acc.fn(T(x)), acc.max); acc)
-(acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vmaximum(map(acc.fn,xs))); acc.max = ifelse(x > acc.max, acc.fn(x), acc.max); acc)
+(acc::AccumMax{T,F})(x) where {T,F} = (acc.n += 1; xx = T(acc.fn(x)); acc.max = ifelse(xx > acc.max, xx, acc.max); acc)
+(acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); xxs = map(a->T(acc.fn(a)), xs); x = vmaximum(xxs); acc.max = ifelse(x > acc.max, x, acc.max); acc)
 
 mutable struct AccumExtrema{T,F} <: Accumulator{T}
     n::Int
@@ -37,7 +37,7 @@ end
 
 function (acc::AccumExtrema{T,F})(x) where {T,F}
     acc.n += 1
-    xx = acc.fn(T(x))
+    xx = T(acc.fn(x))
     if xx < acc.min
        acc.nmin += 1
        acc.min = xx
