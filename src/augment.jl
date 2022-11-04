@@ -7,20 +7,20 @@ mutable struct AccumMin{T,F} <: Accumulator{T}
 end
 
 (acc::AccumMin{T,F})() where {T,F} = acc.min
-(acc::AccumMin{T,F})(x) where {T,F} = (acc.n += 1; acc.min = ifelse(x < acc.min, acc.fn(T(x)), acc.min); acc)
-(acc::AccumMin{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vminimum(xs)); acc.min = ifelse(x < acc.min, acc.fn(x), acc.min); acc)
+(acc::AccumMin{T,F})(x) where {T,F} = (acc.n += 1; xx = acc.fn(T(x)); acc.min = ifelse(xx < acc.min, xx, acc.min); acc)
+(acc::AccumMin{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vminimum(map(acc.fn,xs))); acc.min = ifelse(x < acc.min, acc.fn(x), acc.min); acc)
 
 mutable struct AccumMax{T,F} <: Accumulator{T}
     n::Int
     max::T
     const fn::F
     AccumMax(::Type{T}=Float64; fn::F=identity) where {T,F} =
-        (T <: Integer) ? new{T,F}(0, typemax(T), fn) : new{T,F}(0, floatmax(T), fn)
+        (T <: Integer) ? new{T,F}(0, typemin(T), fn) : new{T,F}(0, floatmin(T), fn)
 end
 
 (acc::AccumMax{T,F})() where {T,F} = acc.max
 (acc::AccumMax{T,F})(x) where {T,F} = (acc.n += 1; acc.max = ifelse(x > acc.max, acc.fn(T(x)), acc.max); acc)
-(acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vmaximum(xs)); acc.max = ifelse(x > acc.max, acc.fn(x), acc.max); acc)
+(acc::AccumMax{T,F})(xs::Seq) where {T,F} = (acc.n += length(xs); x = T(vmaximum(map(acc.fn,xs))); acc.max = ifelse(x > acc.max, acc.fn(x), acc.max); acc)
 
 mutable struct AccumExtrema{T,F} <: Accumulator{T}
     n::Int
@@ -30,7 +30,7 @@ mutable struct AccumExtrema{T,F} <: Accumulator{T}
     max::T
     const fn::F
     AccumExtrema(::Type{T}=Float64; fn::F=identity) where {T,F} =
-        (T <: Integer) ? new{T, F}(0, 0, 0, typemin(T), typemax(T), fn) : new{T, F}(0, 0, 0, floatmin(T), floatmax(T), fn)
+        (T <: Integer) ? new{T, F}(0, 0, 0, typemax(T), typemin(T), fn) : new{T, F}(0, 0, 0, floatmax(T), floatmin(T), fn)
 end
 
 (acc::AccumExtrema{T,F})() where {T,F} = (acc.min, acc.max)
@@ -51,7 +51,7 @@ function (acc::AccumExtrema{T,F})(x) where {T,F}
  
 function (acc::AccumExtrema{T,F})(xs::Seq) where {T,F}
     acc.n += length(xs)
-    xxs = map(fn, xs)
+    xxs = map(acc.fn, xs)
     mn, mx = map(T, vextrema(xxs))
     if mn < acc.min
        acc.nmin += 1
@@ -72,7 +72,7 @@ mutable struct AccumSum{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumSum{T,FN})() where {T,FN} = accum.sum
-(accum::AccumSum{T,FN})(x) where {T,FN} = (accum.n += 1; accum.sum += accum.fn(x); accum)
+(accum::AccumSum{T,FN})(x) where {T,FN} = (accum.n += 1; accum.sum += T(accum.fn(x)); accum)
 (accum::AccumSum{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum.fn, xs); x = T(vsum(xxs)); accum.sum += x; accum)
 
 mutable struct AccumProd{T,FN} <:  Accumulator{T}
@@ -83,7 +83,7 @@ mutable struct AccumProd{T,FN} <:  Accumulator{T}
 end
 
 (accum::AccumProd{T,FN})() where {T,FN} = accum.prod
-(accum::AccumProd{T,FN})(x) where {T,FN} = (accum.n += 1; accum.prod *= accum.fn(x); accum)
+(accum::AccumProd{T,FN})(x) where {T,FN} = (accum.n += 1; accum.prod *= T(accum.fn(x)); accum)
 (accum::AccumProd{T,FN})(xs::Seq) where {T,FN} = (accum.n += length(xs); xxs = map(accum.fn, xs); x = T(prod(xxs)); accum.prod += x; accum)
 
 mutable struct AccumMean{T,FN} <:  Accumulator{T}
