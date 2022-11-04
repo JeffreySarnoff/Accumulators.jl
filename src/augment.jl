@@ -15,7 +15,7 @@ mutable struct AccumMax{T,F} <: Accumulator{T}
     max::T
     const fn::F
     AccumMax(::Type{T}=Float64; fn::F=identity) where {T,F} =
-        (T <: Integer) ? new{T,F}(0, typemin(T), fn) : new{T,F}(0, floatmin(T), fn)
+        (T <: Integer) ? new{T,F}(0, typemax(T), fn) : new{T,F}(0, floatmax(T), fn)
 end
 
 (acc::AccumMax{T,F})() where {T,F} = acc.max
@@ -30,7 +30,7 @@ mutable struct AccumExtrema{T,F} <: Accumulator{T}
     max::T
     const fn::F
     AccumExtrema(::Type{T}=Float64; fn::F=identity) where {T,F} =
-        (T <: Integer) ? new{T, F}(0, 0, 0, typemax(T), typemin(T), fn) : new{T, F}(0, 0, 0, floatmax(T), floatmin(T), fn)
+        (T <: Integer) ? new{T, F}(0, 0, 0, typemin(T), typemax(T), fn) : new{T, F}(0, 0, 0, floatmin(T), floatmax(T), fn)
 end
 
 (acc::AccumExtrema{T,F})() where {T,F} = (acc.min, acc.max)
