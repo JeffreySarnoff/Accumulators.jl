@@ -6,7 +6,37 @@
      AccMeanVar,
      AccExpWtMean, AccExpWtMeanVar
 =#
-
+#=
+names used in StatsBase
+:adjr2, :adjr², :aic, :aicc, :autocor, :autocov, :aweights, 
+:bic, 
+:coef, :coefnames, :coeftable, :competerank, :confint, :cooksdistance, :cor, :cor2cov, :corkendall, :corspearman,
+:counteq, :countmap, :countne, :counts, :cov, :cov2cor, :cronbachalpha, 
+:crosscor, :crosscov, :crossentropy, :crossmodelmatrix, :cumulant, 
+:denserank, :describe, :deviance, :dof, :dof_residual, 
+:ecdf, :entropy, :eweights, 
+:fit, :fitted, :fweights, 
+:genmean, :genvar, :geomean, :gkldiv, 
+:harmmean, 
+:indexmap, :indicatormat, :informationmatrix, :inverse_rle, :iqr, :isfitted, :islinear, 
+:kldivergence, :kurtosis, 
+:levelsmap, :leverage, :loglikelihood, 
+:mad, :maxad, :mean, :mean_and_cov, :mean_and_std, :mean_and_var, :meanad, :meanresponse, 
+:median, :middle, :midpoints, :mode, :model_response, :modelmatrix, :modes, :moment, :msd, :mss, 
+:nobs, :norepeats, :nquantile, :nulldeviance, :nullloglikelihood, 
+:ordinalrank, 
+:pacf, :pairwise, :partialcor, :percentile, :percentilerank, :predict, 
+:proportionmap, :proportions, :psnr, :pweights, 
+:quantile, :quantilerank, 
+:r2, :renyientropy, :residuals, :response, :responsename, :rle, :rmsd, :rss, :r², 
+:sample, :samplepair, :scattermat, :scattermat_zm, :scattermatm, :score, :sem, 
+:skewness, :span, :sqL2dist, :standardize, :std, :stderror, :sum, :summarystats, 
+:tiedrank, :totalvar, :trim, :trimvar, 
+:uweights, 
+:values, :var, :variation, :vcov, 
+:weights, :winsor, :wmedian, :wquantile, :wsample, :wsum, 
+:zscore
+=#
 mutable struct AccCount{T} <: Accumulator{T}
     n::T
     AccCount(::Type{T}=Int64) where {T} = new{T}(zero(T))
