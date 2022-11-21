@@ -2,8 +2,8 @@
      AccCount, 
      AccMinimum, AccMaximum, AccExtrema, 
      AccSum, AccProd,
-     AccMean, AccGeoMean, AccHarmoMean,
-     AccMeanVar,
+     AccMean, AccGeoMean, AccHarmMean,
+     AccMeanVar, AccMeanStd, AccStats,
      AccExpWtMean, AccExpWtMeanVar
 =#
 #=
