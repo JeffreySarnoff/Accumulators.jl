@@ -226,65 +226,8 @@ function (acc::AccExtrema{T})(xs::NTuple{N,T}) where {T, N}
     acc
 end
 
+#
 
-            
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-          
-mutable struct AccMax{T} <: Accumulator{T}
-    max::T
-end
-
-function AccMax(::Type{T}=DefaultFloat) where {T}
-     AccMax{T}(typemin(T))
-end
-
-function (acc::AccMax{T})() where {T}
-    acc.max
-end
-     
-function (acc::AccMax{T})(x) where {T}
-    if x > acc.max
-        acc.max = x
-    end
-    acc
-end
-
-function (acc::AccMax{T})(xs::A) where {T, A<:AbstractVector{T}}
-    acc(vmaximum(xs))
-end
-
-function (acc::AccCount{T})(xs::NTuple{N,T}) where {T, N}
-    acc(maximum(xs))
-end
-
-
-
-# Max
-     
-mutable struct AccMin{T} <: Accumulator{T}
-    n::Int
-    min::T
-    AccMin(::Type{T}=Float64) where {T} =
-        (T <: Integer) ? new{T}(typemax(T)) : new{T}(0, floatmax(T))
-end
-
-(acc::AccMin{T})() where {T} = (acc.min)
-(acc::AccMin{T})(x) where {T} = (acc.n +=1; acc.min = ifelse(x < acc.min, T(x), acc.min); acc)
-(acc::AccMin{T})(xs::Seq) where {T} = (acc.n += length(xs); x = T(vminimum(xs)); acc.min = ifelse(x < acc.min, x, acc.min); acc)
-
-mutable struct AccMax{T} <: Accumu
 acc_nmin(acc::AccExtrema{T}) where {T} = acc.nmin
 acc_nmax(acc::AccExtrema{T}) where {T} = acc.nmax
 acc_midrange(acc::AccExtrema{T}) where {T} = (acc.max / 2) + (acc.min / 2)
