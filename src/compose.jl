@@ -52,6 +52,9 @@ nminima(acc::AccExtrema) = acc.nmin
 nmaxima(acc::AccMinimum) = acc.nmax
 nmaxima(acc::AccExtrema) = acc.nmax
 
+Base.sum(acc::AccSum) = acc.sum
+Base.prod(acc::AccProd) = acc.prod
+
 # Count
 
 mutable struct AccCount{T} <: Accumulator{T}
@@ -254,10 +257,45 @@ function (acc::AccSum{T})(xs::A) where {T, A<:AbstractVector{T}}
     acc
 end
 
-function (acc::AccMinimum{T})(xs::NTuple{N,T}) where {T, N}
+function (acc::AccSum{T})(xs::NTuple{N,T}) where {T, N}
     acc.nobs += N
     x = sum(xs)
     acc.sum += x
+    acc
+end
+
+# Prod
+
+mutable struct AccProd{T} <: Accumulator{T}
+    nobs::Int
+    prod::Int
+end
+
+function AccProd(::Type{T}=DefaultFloat) where {T}
+     AccProd{T}(0, one(T))
+end
+
+function (acc::AccProd{T})() where {T}
+    acc.prod
+end
+
+function (acc::AccProd{T})(x) where {T}
+    acc.nobs += 1
+    acc.prod *= x
+    acc
+end
+
+function (acc::AccProd{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)     
+    x = vprod(xs)
+    acc.prod *= x
+    acc
+end
+
+function (acc::AccProd{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    x = prod(xs)
+    acc.prod *= x
     acc
 end
 
