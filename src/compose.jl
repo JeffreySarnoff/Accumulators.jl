@@ -42,10 +42,17 @@ DefaultFloat = Float64
 
 StatsBase.nobs(acc::A) where {T, A<:Accumulator{T}} = acc.nobs
 
-Base.minimum(acc::AccMinimum) = acc.min
+for (F,A) in ((:(Base.minimum), :AccMinimum), (:(Base.maximum), :AccMaximum), (:(Base.extrema), :AccExtrema),
+              (:(Base.sum), :AccSum), (:(Base.prod), :AccProd),
+              (:(StatsBase.mean), :AccMean), :(StatsBase.geomean), :AccGeoMean), :(StatsBase.harmmean), :AccHarmMean),
+     )
+     @eval $F(acc::$A) = acc()
+end
+
 Base.minimum(acc::AccExtrema) = acc.min
-Base.maximum(acc::AccMaximum) = acc.max
 Base.maximum(acc::AccExtrema) = acc.max
+StatsBase.mean(acc::AccGeoMean) = acc()
+StatsBase.mean(acc::AccHarmMean) = acc()
 
 midrange(acc::AccExtrema) = (acc.min / 2) + (acc.max / 2)
 proportionalrange(acc::AccExtrema, proportion) = (acc.min * proportion) + (acc.max * (1 - proportion))
@@ -54,11 +61,6 @@ nminima(acc::AccMinimum) = acc.nmin
 nminima(acc::AccExtrema) = acc.nmin
 nmaxima(acc::AccMinimum) = acc.nmax
 nmaxima(acc::AccExtrema) = acc.nmax
-
-Base.sum(acc::AccSum) = acc.sum
-Base.prod(acc::AccProd) = acc.prod
-
-StatsBase.mean(acc::AccMean) = acc.mean
 
 # Count
 
