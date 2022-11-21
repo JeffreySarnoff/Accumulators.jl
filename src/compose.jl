@@ -340,8 +340,6 @@ function (acc::AccMean{T})(xs::NTuple{N,T}) where {T, N}
 end
 
 # GeoMean
-
-logabs(x) = log(abs(x))
                                    
 mutable struct AccGeoMean{T} <: Accumulator{T}
     nobs::Int
