@@ -198,7 +198,7 @@ mutable struct AccStats{T} <: Accumulator{T}
 end
 
 function (acc::AccStats{T})() where {T}
-    (acc.acc_count(), acc.acc_mean(), acc.acc_var(), acc.acc_std(), acc.acc_skew(), acc.acc_kurt())
+    (acc_count(acc), acc_mean(acc), acc_var(acc), acc_std(acc), acc_skew(acc), acc_kurt(acc))
 end
                                                   
 function (acc::AccStats{T})(x) where {T}
@@ -294,7 +294,7 @@ acc_midrange(acc::AccExtrema{T}) where {T} = (acc.max / 2) + (acc.min / 2)
                                                                       
 acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
 acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
-acc_std(acc::AccStats{T}) where {T} = T(sqrt(var(x)))
+acc_std(acc::AccStats{T}) where {T} = T(sqrt(acc_var(acc)))
 acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
 acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
                                                                       
