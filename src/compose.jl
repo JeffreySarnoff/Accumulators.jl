@@ -97,7 +97,7 @@ mutable struct AccMinimum{T} <: Accumulator{T}
     min::T
 end
 
-function AccMinimum(::Type{T}=DefaultFloat) where {T}
+function AccMinimum(::Type{T}=AccNum) where {T}
      AccMinimum{T}(0, 0, typemax(T))
 end
 
@@ -142,7 +142,7 @@ mutable struct AccMaximum{T} <: Accumulator{T}
     max::T
 end
 
-function AccMaximum(::Type{T}=DefaultFloat) where {T}
+function AccMaximum(::Type{T}=AccNum) where {T}
      AccMaximum{T}(0, 0, typemin(T))
 end
 
@@ -189,7 +189,7 @@ mutable struct AccExtrema{T} <: Accumulator{T}
     max::T
 end
 
-function AccExtrema(::Type{T}=DefaultFloat) where {T}
+function AccExtrema(::Type{T}=AccNum) where {T}
      AccExtrema{T}(0, 0, 0, typemax(T), typemin(T))
 end
 
@@ -241,7 +241,7 @@ mutable struct AccSum{T} <: Accumulator{T}
     sum::T
 end
 
-function AccSum(::Type{T}=DefaultFloat) where {T}
+function AccSum(::Type{T}=AccNum) where {T}
      AccSum{T}(0, zero(T))
 end
 
@@ -276,7 +276,7 @@ mutable struct AccProd{T} <: Accumulator{T}
     prod::T
 end
 
-function AccProd(::Type{T}=DefaultFloat) where {T}
+function AccProd(::Type{T}=AccNum) where {T}
      AccProd{T}(0, one(T))
 end
 
@@ -311,7 +311,7 @@ mutable struct AccMean{T} <: Accumulator{T}
     mean::T
 end
 
-function AccMean(::Type{T}=DefaultFloat) where {T}
+function AccMean(::Type{T}=AccNum) where {T}
      AccMean{T}(0, zero(T))
 end
 
@@ -348,7 +348,7 @@ mutable struct AccGeoMean{T} <: Accumulator{T}
     sumlog::T
 end
 
-function AccGeoMean(::Type{T}=DefaultFloat) where {T}
+function AccGeoMean(::Type{T}=AccNum) where {T}
      AccGeoMean{T}(0, one(T))
 end
 
@@ -374,7 +374,6 @@ function (acc::AccGeoMean{T})(xs::NTuple{N,T}) where {T, N}
     acc.sumlog += sum(map(logabs, xs))
     acc
 end
-
 
 #
                                                                       
