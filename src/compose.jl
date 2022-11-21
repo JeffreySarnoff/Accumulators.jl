@@ -1,8 +1,8 @@
 #=
      AccCount, 
-     AccMin, AccMax, AccExtrema, 
+     AccMinimum, AccMaximum, AccExtrema, 
      AccSum, AccProd,
-     AccMean, AccGeometricMean, AccHarmonicMean,
+     AccMean, AccGeoMean, AccHarmoMean,
      AccMeanVar,
      AccExpWtMean, AccExpWtMeanVar
 =#
@@ -223,6 +223,41 @@ function (acc::AccExtrema{T})(xs::NTuple{N,T}) where {T, N}
         acc.nmax += 1
         acc.max = mx
     end
+    acc
+end
+
+# Sum
+
+mutable struct AccSum{T} <: Accumulator{T}
+    nobs::Int
+    sum::Int
+end
+
+function AccSum(::Type{T}=DefaultFloat) where {T}
+     AccSum{T}(0, zero(T))
+end
+
+function (acc::AccSum{T})() where {T}
+    acc.sum
+end
+
+function (acc::AccSum{T})(x) where {T}
+    acc.nobs += 1
+    acc.sum += x
+    acc
+end
+
+function (acc::AccSum{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)     
+    x = vsum(xs)
+    acc.sum += x
+    acc
+end
+
+function (acc::AccMinimum{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    x = sum(xs)
+    acc.sum += x
     acc
 end
 
