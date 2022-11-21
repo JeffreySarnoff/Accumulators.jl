@@ -33,6 +33,17 @@ sumlogabs(xs::Seq) = vsum(map(logabs, xs))
 
 abstract type Accumulator{T} <:Function end
 
+accumulator_type = Float64
+if isdefined(Main, :AccumulatorNumType)
+    accumulator_type = AccumulatorNumType
+elseif haskey(ENV, "AccumulatorNumType")
+    defaultnumtype = parse(ENV["AccumulatorNumType"])
+    if (isa(defaultnumtype, Type) && isa(defaultnumtype, Number))
+        accumulator_type = defaultnumtype
+    end
+end
+const AccNum = accumulator_type    
+    
 include("compose.jl")
 include("augment.jl")
 include("absvals.jl")
