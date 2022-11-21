@@ -37,15 +37,100 @@ names used in StatsBase
 :weights, :winsor, :wmedian, :wquantile, :wsample, :wsum, 
 :zscore
 =#
+
+const DefaultFloat = Float64
+
+# Count
+
 mutable struct AccCount{T} <: Accumulator{T}
-    n::T
-    AccCount(::Type{T}=Int64) where {T} = new{T}(zero(T))
+    nobs::T
 end
 
-(acc::AccCount{T})() where {T} = (acc.n)
-(acc::AccCount{T})(x) where {T} = (acc.n += one(T); acc)
-(acc::AccCount{T})(xs::Seq) where {T} = (acc.n += T(length(xs)); acc)
+function AccCount(::Type{T}=Int64) where {T}
+     AccCount{T}(zero(T))
+end
 
+function (acc::AccCount{T})() where {T}
+    acc.nobs
+end
+     
+function (acc::AccCount{T})(x) where {T}
+    acc.nobs += one(T)
+    acc
+end
+
+function (acc::AccCount{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)
+    acc
+end
+
+function (acc::AccCount{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    acc
+end
+
+# Min
+
+mutable struct AccMin{T} <: Accumulator{T}
+    min::T
+end
+
+function AccMin(::Type{T}=DefaultFloat) where {T}
+     AccMin{T}(typemax(T))
+end
+
+function (acc::AccMin{T})() where {T}
+    acc.min
+end
+     
+function (acc::AccMin{T})(x) where {T}
+    if x < acc.min
+        acc.min = x
+    end
+    acc
+end
+
+function (acc::AccMin{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc(vminimum(xs))
+end
+
+function (acc::AccCount{T})(xs::NTuple{N,T}) where {T, N}
+    acc(minimum(xs))
+end
+
+# Max
+
+mutable struct AccMax{T} <: Accumulator{T}
+    max::T
+end
+
+function AccMax(::Type{T}=DefaultFloat) where {T}
+     AccMax{T}(typemin(T))
+end
+
+function (acc::AccMax{T})() where {T}
+    acc.max
+end
+     
+function (acc::AccMax{T})(x) where {T}
+    if x > acc.max
+        acc.max = x
+    end
+    acc
+end
+
+function (acc::AccMax{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc(vmaximum(xs))
+end
+
+function (acc::AccCount{T})(xs::NTuple{N,T}) where {T, N}
+    acc(maximum(xs))
+end
+
+
+
+# Max
+     
 mutable struct AccMin{T} <: Accumulator{T}
     n::Int
     min::T
