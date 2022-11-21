@@ -26,12 +26,7 @@ export Accumulator,
 using LoopVectorization: @turbo, @tturbo
 using VectorizedStatistics
 
-const Seq = Union{AbstractVector{T}, NTuple{N,T}} where {N,T}
-
-logabs(x) = log(abs(x))
-sumlogabs(xs::Seq) = vsum(map(logabs, xs))
-
-abstract type Accumulator{T} <:Function end
+#
 
 accumulator_type = Float64
 if isdefined(Main, :AccumulatorNumType)
@@ -43,6 +38,14 @@ elseif haskey(ENV, "AccumulatorNumType")
     end
 end
 const AccNum = accumulator_type    
+
+#
+
+abstract type Accumulator{T} <:Function end
+
+logabs(x) = log(abs(x))
+sumlogabs(xs::A) where {T, A<:AbstractVector{T}} = vsum(map(logabs, xs))
+sumlogabs(xs::NTuple{N,T}) where {T, N} = sum(map(logabs, xs))
     
 include("compose.jl")
 include("augment.jl")
