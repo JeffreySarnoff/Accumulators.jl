@@ -373,6 +373,41 @@ function (acc::AccGeoMean{T})(xs::NTuple{N,T}) where {T, N}
     acc
 end
 
+# HarmMean
+                                   
+mutable struct AccHarmMean{T} <: Accumulator{T}
+    nobs::Int
+    invhmean::T
+end
+
+function AccHarmMean(::Type{T}=AccNum) where {T}
+     AccHarmMean{T}(0, zero(T))
+end
+
+function (acc::AccHarmMean{T})() where {T}
+    n = ifelse(acc.nobs === 0 ? 1 : acc.nobs)
+    n / acc.invhmean
+end
+
+function (acc::AccHarmMean{T})(x) where {T}
+    acc.nobs += 1
+    acc.invhmean += one(T) / x
+    acc
+end
+
+function (acc::AccHarmMean{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)
+    acc.invhmean += sum(map(inv, xs))
+    acc
+end
+
+function (acc::AccHarmMean{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    acc.invhmean += sum(map(inv, xs))
+    acc
+end
+
+#
 #
                                                                       
 acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
