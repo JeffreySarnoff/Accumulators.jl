@@ -96,7 +96,7 @@ end
 function (acc::AccMinimum{T})() where {T}
     acc.min
 end
-     
+
 function (acc::AccMinimum{T})(x) where {T}
     acc.nobs += 1
     if x < acc.min
@@ -141,7 +141,7 @@ end
 function (acc::AccMaximum{T})() where {T}
     acc.max
 end
-     
+
 function (acc::AccMaximum{T})(x) where {T}
     acc.nobs += 1
     if x > acc.max
@@ -172,6 +172,59 @@ function (acc::AccMaximum{T})(xs::NTuple{N,T}) where {T, N}
 end
 
 # Extrema
+
+mutable struct AccExtrema{T} <: Accumulator{T}
+    nobs::Int
+    nmin::Int
+    nmax::Int
+    min::T
+    max::T
+end
+
+function AccExtrema(::Type{T}=DefaultFloat) where {T}
+     AccExtrema{T}(0, 0, 0, typemax(T), typemin(T))
+end
+
+function (acc::AccExtrema{T})() where {T}
+    (acc.min, acc.max)
+end
+
+function (acc::AccExtrema{T})(x) where {T}
+    acc.nobs += 1
+    if x < acc.min
+        acc.nmin += 1
+        acc.min = x
+    end
+    acc
+end
+
+function (acc::AccExtrema{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)     
+    mn, mx = vextrema(xs)
+    if mn < acc.min
+        acc.nmin += 1
+        acc.min = mn
+    end
+    if mx > acc.max
+        acc.nmax += 1
+        acc.max = mx
+    end
+    acc
+end
+
+function (acc::AccExtrema{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    mn, mx = extrema(xs)
+    if mn < acc.min
+        acc.nmin += 1
+        acc.min = mn
+    end
+    if mx > acc.max
+        acc.nmax += 1
+        acc.max = mx
+    end
+    acc
+end
 
 
             
