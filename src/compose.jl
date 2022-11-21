@@ -38,7 +38,19 @@ names used in StatsBase
 :zscore
 =#
 
-const DefaultFloat = Float64
+DefaultFloat = Float64
+
+StatsBase.nobs(acc::A) where {T, A<:Accumulator{T}} = acc.nobs
+
+Base.minimum(acc::AccMinimum) = acc.min
+Base.minimum(acc::AccExtrema) = acc.min
+Base.maximum(acc::AccMaximum) = acc.max
+Base.maximum(acc::AccExtrema) = acc.max
+
+nminima(acc::AccMinimum) = acc.nmin
+nminima(acc::AccExtrema) = acc.nmin
+nmaxima(acc::AccMinimum) = acc.nmax
+nmaxima(acc::AccExtrema) = acc.nmax
 
 # Count
 
@@ -103,7 +115,7 @@ function (acc::AccMinimum{T})(xs::A) where {T, A<:AbstractVector{T}}
     end
     acc
 end
-               
+
 function (acc::AccMinimum{T})(xs::NTuple{N,T}) where {T, N}
     acc.nobs += N
     x = minimum(xs)
@@ -116,6 +128,67 @@ end
 
 # Max
 
+mutable struct AccMaximum{T} <: Accumulator{T}
+    nobs::Int
+    nmax::Int
+    max::T
+end
+
+function AccMaximum(::Type{T}=DefaultFloat) where {T}
+     AccMaximum{T}(0, 0, typemin(T))
+end
+
+function (acc::AccMaximum{T})() where {T}
+    acc.max
+end
+     
+function (acc::AccMaximum{T})(x) where {T}
+    acc.nobs += 1
+    if x > acc.max
+        acc.nmax += 1
+        acc.max = x
+    end
+    acc
+end
+
+function (acc::AccMaximum{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)     
+    x = vmaximum(xs)
+    if x > acc.max
+        acc.nmax += 1
+        acc.max = x
+    end
+    acc
+end
+
+function (acc::AccMaximum{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    x = maximum(xs)
+    if x > acc.max
+        acc.nmax += 1
+        acc.max = x
+    end
+    acc
+end
+
+# Extrema
+
+
+            
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
+          
 mutable struct AccMax{T} <: Accumulator{T}
     max::T
 end
