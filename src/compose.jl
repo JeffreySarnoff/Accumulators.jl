@@ -71,31 +71,47 @@ end
 
 # Min
 
-mutable struct AccMin{T} <: Accumulator{T}
+mutable struct AccMinimum{T} <: Accumulator{T}
+    nobs::Int
+    nmin::Int
     min::T
 end
 
-function AccMin(::Type{T}=DefaultFloat) where {T}
-     AccMin{T}(typemax(T))
+function AccMinimum(::Type{T}=DefaultFloat) where {T}
+     AccMinimum{T}(0, 0, typemax(T))
 end
 
-function (acc::AccMin{T})() where {T}
+function (acc::AccMinimum{T})() where {T}
     acc.min
 end
      
-function (acc::AccMin{T})(x) where {T}
+function (acc::AccMinimum{T})(x) where {T}
+    acc.nobs += 1
     if x < acc.min
+        acc.nmin += 1
         acc.min = x
     end
     acc
 end
 
-function (acc::AccMin{T})(xs::A) where {T, A<:AbstractVector{T}}
-    acc(vminimum(xs))
+function (acc::AccMinimum{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)     
+    x = vminimum(xs)
+    if x < acc.min
+        acc.nmin += 1
+        acc.min = x
+    end
+    acc
 end
-
-function (acc::AccCount{T})(xs::NTuple{N,T}) where {T, N}
-    acc(minimum(xs))
+               
+function (acc::AccMinimum{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    x = minimum(xs)
+    if x < acc.min
+        acc.nmin += 1
+        acc.min = x
+    end
+    acc
 end
 
 # Max
