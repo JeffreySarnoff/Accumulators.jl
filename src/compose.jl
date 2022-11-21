@@ -47,6 +47,9 @@ Base.minimum(acc::AccExtrema) = acc.min
 Base.maximum(acc::AccMaximum) = acc.max
 Base.maximum(acc::AccExtrema) = acc.max
 
+midrange(acc::AccExtrema) = (acc.min / 2) + (acc.max / 2)
+proportionalrange(acc::AccExtrema, proportion) = (acc.min * proportion) + (acc.max * (1 - proportion))
+
 nminima(acc::AccMinimum) = acc.nmin
 nminima(acc::AccExtrema) = acc.nmin
 nmaxima(acc::AccMinimum) = acc.nmax
@@ -54,6 +57,8 @@ nmaxima(acc::AccExtrema) = acc.nmax
 
 Base.sum(acc::AccSum) = acc.sum
 Base.prod(acc::AccProd) = acc.prod
+
+StatsBase.mean(acc::AccMean) = acc.mean
 
 # Count
 
@@ -233,7 +238,7 @@ end
 
 mutable struct AccSum{T} <: Accumulator{T}
     nobs::Int
-    sum::Int
+    sum::T
 end
 
 function AccSum(::Type{T}=DefaultFloat) where {T}
@@ -268,7 +273,7 @@ end
 
 mutable struct AccProd{T} <: Accumulator{T}
     nobs::Int
-    prod::Int
+    prod::T
 end
 
 function AccProd(::Type{T}=DefaultFloat) where {T}
@@ -299,11 +304,79 @@ function (acc::AccProd{T})(xs::NTuple{N,T}) where {T, N}
     acc
 end
 
-#
+# Mean
 
-acc_nmin(acc::AccExtrema{T}) where {T} = acc.nmin
-acc_nmax(acc::AccExtrema{T}) where {T} = acc.nmax
-acc_midrange(acc::AccExtrema{T}) where {T} = (acc.max / 2) + (acc.min / 2)
+mutable struct AccMean{T} <: Accumulator{T}
+    nobs::Int
+    mean::T
+end
+
+function AccMean(::Type{T}=DefaultFloat) where {T}
+     AccMean{T}(0, zero(T))
+end
+
+function (acc::AccMean{T})() where {T}
+    acc.mean
+end
+
+function (acc::AccMean{T})(x) where {T}
+    acc.nobs += 1
+    acc.mean += (x - acc.mean) / acc.nobs
+    acc
+end
+
+function (acc::AccMean{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)     
+    xmean = vmean(xs)
+    acc.mean += (xmean - acc.mean) / acc.nobs
+    acc
+end
+
+function (acc::AccMean{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    xmean = mean(xs)
+    acc.mean += (xmean - acc.mean) / acc.nobs
+    acc
+end
+
+# GeoMean
+
+logabs(x) = log(abs(x))
+                                   
+mutable struct AccGeoMean{T} <: Accumulator{T}
+    nobs::Int
+    sumlog::T
+end
+
+function AccGeoMean(::Type{T}=DefaultFloat) where {T}
+     AccGeoMean{T}(0, one(T))
+end
+
+function (acc::AccGeoMean{T})() where {T}
+    n = ifelse(acc.nobs === 0 ? 1 : acc.nobs)
+    exp(acc.sumlog / n)
+end
+
+function (acc::AccGeoMean{T})(x) where {T}
+    acc.nobs += 1
+    acc.sumlog += logabs(x)
+    acc
+end
+
+function (acc::AccGeoMean{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)
+    acc.sumlog += sum(map(logabs, xs))
+    acc
+end
+
+function (acc::AccGeoMean{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    acc.sumlog += sum(map(logabs, xs))
+    acc
+end
+
+
+#
                                                                       
 acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
 acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
