@@ -38,8 +38,6 @@ names used in StatsBase
 :zscore
 =#
 
-DefaultFloat = Float64
-
 StatsBase.nobs(acc::A) where {T, A<:Accumulator{T}} = acc.nobs
 
 for (F,A) in ((:(Base.minimum), :AccMinimum), (:(Base.maximum), :AccMaximum), (:(Base.extrema), :AccExtrema),
