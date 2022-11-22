@@ -3,11 +3,25 @@ module Accumulators
 export Accumulator,
     # Acc is a typed accumlator
     AccCount,
-    AccMin, AccMax, AccExtrema,
+    AccMinimum, AccMaximum, AccExtrema,
     AccSum, AccProd,
-    AccMean, AccGeometricMean, AccHarmonicMean,
-    AccMeanVar,
-    AccStats,
+    AccMean, AccGeoMean, AccHarmMean,
+    AccMeanVar, AccMeanStd, AccStats,
+
+    AccMinimumAbs, AccMaximumAbs, AccExtremaAbs,
+    AccSumAbs, AccProdAbs,
+
+    AccMeanAbs, AccGeoMeanAbs, AccHarmMeanAbs,
+    AccMeanVarMag, AccMeanStdMag, AccStatsMag,
+    
+    AccMagMinimum, AccMagMaximum, AccMagExtrema,
+    AccMagSum, AccMagProd,
+    AccAbsMinimum, AccMaximum, AccMagExtrema,
+    AccMagSum, AccMagProd,
+
+    AccMeanMag, AccGeoMeanMag, AccHarmMeanMag,
+    AccMeanVarMag, AccMeanStdMag, AccStatsMag,
+    
     AccExpWtMean, AccExpWtMeanVar,
     AccMinAbs, AccMinAbs2, AccMaxAbs, AccMaxAbs2,
     AccSumAbs, AccSumAbs2, AccProdAbs, AccProdAbs2, 
