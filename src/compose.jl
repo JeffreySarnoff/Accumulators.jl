@@ -419,27 +419,43 @@ end
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
 
-mutable struct AccumMeanVar{T} <: Accumulator{T}
+mutable struct AccMeanVar{T} <: Accumulator{T}
     nobs::Int
     mean::T
     svar::T
 end
 
-function AccumMeanVar(::Type{T}=Float64) where {T}
-    AccumMeanVar{T}(0, zero(T), zero(T))
+function AccMeanVar(::Type{T}=Float64) where {T}
+    AccMeanVar{T}(0, zero(T), zero(T))
 end
                                                        
-function (accum::AccumMeanVar{T})() where {T}
-    unbiased_var = accum.svar / (accum.nobs - 1)
-    (accum.mean, unbiased_var)
+function (acc::AccMeanVar{T})() where {T}
+    unbiased_var = acc.svar / (acc.nobs - 1)
+    (acc.mean, unbiased_var)
 end
 
-function (accum::AccumMeanVar{T})(x) where {T}
-    oldmean = accum.mean
-    accum.mean = oldmean + (x - oldmean) / accum.nobs
-    accum.svar = accum.svar + (x - oldmean) * (x - accum.mean)
-    accum
+function (acc::AccumMeanVar{T})(x) where {T}
+    acc.nobs += 1
+    prior_mean = acc.mean
+    acc.mean = oldmean + (x - prior_mean) / acc.nobs
+    acc.svar = acc.svar + (x - prior_mean) * (x - acc.mean)
+    acc
 end
 
+function (acc::AccMeanVar{T})(xs::A) where {T, A<:AbstractVector{T}}
+    acc.nobs += length(xs)
+    prior_mean = acc.mean
+    xmean = vmean(xs)
+    acc.mean += (xmean - prior_mean) / acc.nobs
+    acc
+end
+
+function (acc::AccMeanVar{T})(xs::NTuple{N,T}) where {T, N}
+    acc.nobs += N
+    prior_mean = acc.mean
+    xmean = mean(xs)
+    acc.mean += (xmean - prior_mean) / acc.nobs
+    acc
+end
 #
 
