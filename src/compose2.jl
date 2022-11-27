@@ -30,7 +30,7 @@ function AccCov(::Type{T}=Float64) where {T}
 end
 
 function (acc::AccCov{T})() where {T}
-    acc.c / (acc.nobs - 1)
+    ifelse(acc.nobs < 2, zero(T), acc.c / (acc.nobs - 1))    
 end
 
 function (acc::AccCov{T})(x::T, y::T) where {T}
@@ -71,6 +71,9 @@ function AccCor(::Type{T}=Float64) where {T}
 end
 
 function (acc::AccCor{T})() where {T}
+    if acc.nobs < 2
+        return zero(T)
+    end
     corr = acc.c / (acc.nobs - 1)
     unbiased_xvar = acc.xsvar / (acc.nobs - 1)
     unbiased_yvar = acc.ysvar / (acc.nobs - 1)
