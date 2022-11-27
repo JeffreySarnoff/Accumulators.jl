@@ -340,7 +340,7 @@ function (acc::AccMean{T})(xs::NTuple{N,T}) where {T, N}
 end
 
 # GeoMean
-                                   
+
 mutable struct AccGeoMean{T} <: Accumulator{T}
     nobs::Int
     sumlog::T
