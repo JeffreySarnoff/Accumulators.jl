@@ -136,7 +136,7 @@ function (acc::AccCov{T})(x::T, y::T) where {T}
     acc.dxdy = ifelse(!isfinite(acc.dxdy), zero(T), acc.dxdy)
     acc.xy += x * y
     acc.xy = ifelse(!isfinite(acc.xy), zero(T), acc.xy)
-    acc.c += ifelse(acc.nobs === 1, zero(T), dx * dy)
+    acc.c += ifelse(acc.nobs === 1, zero(T), acc.dxdy)
     acc
 end
 
