@@ -17,6 +17,7 @@ def online_covariance(data1, data2):
 =#
 
 # Cov
+# see https://softwareengineering.stackexchange.com/questions/337617/algorithm-for-windowed-online-covariance
 
 mutable struct AccCov{T} <: Accumulator{T}
     nobs::Int
@@ -39,7 +40,7 @@ function (acc::AccCov{T})(x::T, y::T) where {T}
     dy = y - acc.ymean
     acc.xmean += dx / acc.nobs
     acc.ymean += dy / acc.nobs
-    acc.c += dx * dy
+    acc.c += ifelse(acc.nobs === 1, zero(T), dx * dy)
     acc
 end
 
@@ -51,7 +52,103 @@ function (acc::AccCov{T})(xs::Seq{T}, ys::Seq{T}) where {T}
     ymean = vmean(ys)
     dy = ymean - acc.ymean
     acc.ymean += dy / acc.nobs
-    acc.c += dx * dy
+    acc.c += ifelse(acc.nobs === 1, zero(T), dx * dy)
+    acc
+end
+
+# Cov
+
+mutable struct AccCov{T} <: Accumulator{T}
+    nobs::Int
+    xmean::T
+    ymean::T
+    scov::T
+end
+
+function AccCov(::Type{T}=Float64) where {T}
+    AccCov{T}(0, zero(T), zero(T), zero(T))
+end
+
+function (acc::AccCov{T})() where {T}
+    ifelse(acc.nobs < 2, zero(T), acc.scov)
+end
+
+function (acc::AccCov{T})(x::T, y::T) where {T}
+    acc.nobs += 1
+    dx = x - acc.xmean
+    dy = y - acc.ymean
+    acc.xmean += dx / acc.nobs
+    acc.ymean += dy / acc.nobs
+    t = inv(acc.nobs)
+    tm1 = inv(t - 1)
+    tm2 = acc.nobs - 2
+    prior_scov = acc.scov
+    acc.scov = (tm2 * tm1) * prior_scov + t * dx * dy
+    acc
+end
+
+function (acc::AccCov{T})(xs::Seq{T}, ys::Seq{T}) where {T}
+    acc.nobs += length(xs)
+    xmean = vmean(xs)
+    dx = xmean - acc.xmean
+    acc.xmean += dx / acc.nobs
+    ymean = vmean(ys)
+    dy = ymean - acc.ymean
+    acc.ymean += dy / acc.nobs
+    acc.c += ifelse(acc.nobs === 1, zero(T), dx * dy)
+    acc
+end
+
+
+# Cov
+# see https://softwareengineering.stackexchange.com/questions/337617/algorithm-for-windowed-online-covariance
+
+mutable struct AccCov{T} <: Accumulator{T}
+    nobs::Int
+    dx::T
+    dy::T
+    xsum::T
+    ysum::T
+    xmean::T
+    ymean::T
+    dxdy::T
+    xy::T
+    c::T
+end
+
+function AccCov(::Type{T}=Float64) where {T}
+    AccCov{T}(0, zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T))
+end
+
+function (acc::AccCov{T})() where {T}
+    ifelse(acc.nobs < 2, zero(T), acc.c / (acc.nobs - 1))
+end
+
+function (acc::AccCov{T})(x::T, y::T) where {T}
+    acc.nobs += 1
+    acc.xsum += x
+    acc.ysum += y
+    acc.dx = x - acc.xmean
+    acc.dy = y - acc.ymean
+    acc.xmean += dx / acc.nobs
+    acc.ymean += dy / acc.nobs
+    acc.dxdy += dx*dy
+    acc.dxdy = ifelse(!isfinite(acc.dxdy), zero(T), acc.dxdy)
+    acc.xy += x*y
+    acc.xy = ifelse(!isfinite(acc.xy), zero(T), acc.xy)
+    acc.c += ifelse(acc.nobs === 1, zero(T), dx * dy)
+    acc
+end
+
+function (acc::AccCov{T})(xs::Seq{T}, ys::Seq{T}) where {T}
+    acc.nobs += length(xs)
+    xmean = vmean(xs)
+    dx = xmean - acc.xmean
+    acc.xmean += dx / acc.nobs
+    ymean = vmean(ys)
+    dy = ymean - acc.ymean
+    acc.ymean += dy / acc.nobs
+    acc.c += ifelse(acc.nobs === 1, zero(T), dx * dy)
     acc
 end
 
