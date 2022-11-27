@@ -27,7 +27,7 @@ export Accumulator,
     AccSumAbs, AccSumAbs2, AccProdAbs, AccProdAbs2, 
     AccMeanAbs, AccMeanAbs2, AccMeanVarAbs, AccMeanVarAbs2,
     # for paired data streams
-    AccCov, AccCorr,
+    AccCov, AccCor,
     # Accum is Acc with a prespecified function applied to each new 'x'
     AccumMin, AccumMax, AccumExtrema,
     AccumSum, AccumProd,
