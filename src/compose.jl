@@ -365,7 +365,7 @@ end
 function (acc::AccMeanVar{T})(x) where {T}
     acc.nobs += 1
     prior_mean = acc.mean
-    acc.mean = oldmean + (x - prior_mean) / acc.nobs
+    acc.mean = prior_mean + (x - prior_mean) / acc.nobs
     acc.svar = acc.svar + (x - prior_mean) * (x - acc.mean)
     acc
 end
