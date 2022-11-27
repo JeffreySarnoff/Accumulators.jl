@@ -43,13 +43,11 @@ end
 
 function (acc::AccCov{T})(xs::Seq{T}, ys::Seq{T}) where {T}
     acc.nobs += length(xs)
-    prior_xmean = acc.xmean
-    prior_ymean = acc.ymean
     xmean = vmean(xs)
-    ymean = vmean(ys)
-    dx = xmean - prior_xmean
-    dy = ymean - prior_ymean
+    dx = xmean - acc.xmean
     acc.xmean += dx / acc.nobs
+    ymean = vmean(ys)
+    dy = ymean - acc.ymean
     acc.ymean += dy / acc.nobs
     acc.c += dx * dy
     acc
