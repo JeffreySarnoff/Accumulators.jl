@@ -30,7 +30,7 @@ function AccCov(::Type{T}=Float64) where {T}
 end
 
 function (acc::AccCov{T})() where {T}
-    ifelse(acc.nobs < 2, zero(T), acc.c / (acc.nobs - 1))    
+    ifelse(acc.nobs < 2, zero(T), acc.c / (acc.nobs - 1))
 end
 
 function (acc::AccCov{T})(x::T, y::T) where {T}
