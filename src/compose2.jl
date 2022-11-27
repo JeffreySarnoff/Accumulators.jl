@@ -33,7 +33,7 @@ function (acc::AccCov{T})() where {T}
     acc.c / (acc.nobs - 1)
 end
 
-function (acc::AccCov{T})(x, y) where {T}
+function (acc::AccCov{T})(x::T, y::T) where {T}
     acc.nobs += 1
     dx = x - acc.xmean
     dy = y - acc.ymean
