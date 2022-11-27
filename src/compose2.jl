@@ -41,22 +41,8 @@ function (acc::AccCov{T})(x, y) where {T}
     acc
 end
 
-function (acc::AccCov{T})(xs::A, ys::A) where {T, A<:AbstractVector{T}}
+function (acc::AccCov{T})(xs::Seq{T}, ys::Seq{T}) where {T}
     acc.nobs += length(xs)
-    prior_xmean = acc.xmean
-    prior_ymean = acc.ymean
-    xmean = vmean(xs)
-    ymean = vmean(ys)
-    dx = xmean - prior_xmean
-    dy = ymean - prior_ymean
-    acc.xmean += dx / acc.nobs
-    acc.ymean += dy / acc.nobs
-    acc.c += dx * dy
-    acc
-end
-
-function (acc::AccCovar{T})(xs::NTuple{N,T}, ys::NTuple{N,T}) where {T, N}
-    acc.nobs += N
     prior_xmean = acc.xmean
     prior_ymean = acc.ymean
     xmean = vmean(xs)
