@@ -96,10 +96,12 @@ function (acc::AccCorr{T})(xs::Seq{T}, ys::Seq{T}) where {T}
         throw(ArgumentError(string("lengths must be equal (", n, " != ", length(ys), ")")))
     end
     acc.nobs += length(xs)
+    prior_xmean = acc.xmean
     xmean = vmean(xs)
     dx = xmean - acc.xmean
     acc.xmean += dx / acc.nobs
     acc.xsvar = acc.xsvar + (xmean - prior_xmean) * (xmean - acc.xmean)
+    prior_ymean = acc.ymean
     ymean = vmean(ys)
     dy = ymean - acc.ymean
     acc.ymean += dy / acc.nobs
