@@ -62,6 +62,7 @@ sumlogabs(xs::A) where {T, A<:AbstractVector{T}} = vsum(map(logabs, xs))
 sumlogabs(xs::NTuple{N,T}) where {T, N} = sum(map(logabs, xs))
     
 include("compose.jl")
+include("compose2.jl")
 include("augment.jl")
 include("absvals.jl")
 
