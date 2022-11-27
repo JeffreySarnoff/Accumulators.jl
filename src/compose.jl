@@ -109,7 +109,7 @@ function (acc::AccMinimum{T})() where {T}
     acc.min
 end
 
-function (acc::AccMinimum{T})(x) where {T}
+function (acc::AccMinimum{T})(x::T) where {T}
     acc.nobs += 1
     if x < acc.min
         acc.nmin += 1
@@ -144,7 +144,7 @@ function (acc::AccMaximum{T})() where {T}
     acc.max
 end
 
-function (acc::AccMaximum{T})(x) where {T}
+function (acc::AccMaximum{T})(x::T) where {T}
     acc.nobs += 1
     if x > acc.max
         acc.nmax += 1
@@ -181,7 +181,7 @@ function (acc::AccExtrema{T})() where {T}
     (acc.min, acc.max)
 end
 
-function (acc::AccExtrema{T})(x) where {T}
+function (acc::AccExtrema{T})(x::T) where {T}
     acc.nobs += 1
     if x < acc.min
         acc.nmin += 1
@@ -219,7 +219,7 @@ function (acc::AccSum{T})() where {T}
     acc.sum
 end
 
-function (acc::AccSum{T})(x) where {T}
+function (acc::AccSum{T})(x::T) where {T}
     acc.nobs += 1
     acc.sum += x
     acc
@@ -247,7 +247,7 @@ function (acc::AccProd{T})() where {T}
     acc.prod
 end
 
-function (acc::AccProd{T})(x) where {T}
+function (acc::AccProd{T})(x::T) where {T}
     acc.nobs += 1
     acc.prod *= x
     acc
@@ -275,7 +275,7 @@ function (acc::AccMean{T})() where {T}
     acc.mean
 end
 
-function (acc::AccMean{T})(x) where {T}
+function (acc::AccMean{T})(x::T) where {T}
     acc.nobs += 1
     acc.mean += (x - acc.mean) / acc.nobs
     acc
@@ -304,9 +304,9 @@ function (acc::AccGeoMean{T})() where {T}
     exp(acc.sumlog / n)
 end
 
-function (acc::AccGeoMean{T})(x) where {T}
+function (acc::AccGeoMean{T})(x::T) where {T}
     acc.nobs += 1
-    acc.sumlog += logabs(x)
+    acc.sumlog += logabs(x::T)
     acc
 end
 
@@ -332,7 +332,7 @@ function (acc::AccHarmMean{T})() where {T}
     n / acc.invhmean
 end
 
-function (acc::AccHarmMean{T})(x) where {T}
+function (acc::AccHarmMean{T})(x::T) where {T}
     acc.nobs += 1
     acc.invhmean += one(T) / x
     acc
@@ -362,7 +362,7 @@ function (acc::AccMeanVar{T})() where {T}
     (acc.mean, unbiased_var)
 end
 
-function (acc::AccMeanVar{T})(x) where {T}
+function (acc::AccMeanVar{T})(x::T) where {T}
     acc.nobs += 1
     prior_mean = acc.mean
     acc.mean = prior_mean + (x - prior_mean) / acc.nobs
@@ -379,4 +379,3 @@ function (acc::AccMeanVar{T})(xs::Seq{T}) where {T}
 end
 
 #
-
