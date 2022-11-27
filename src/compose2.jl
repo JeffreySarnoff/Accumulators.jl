@@ -105,6 +105,8 @@ end
 
 mutable struct AccCov{T} <: Accumulator{T}
     nobs::Int
+    x::T
+    y::T
     dx::T
     dy::T
     xsum::T
@@ -117,7 +119,7 @@ mutable struct AccCov{T} <: Accumulator{T}
 end
 
 function AccCov(::Type{T}=Float64) where {T}
-    AccCov{T}(0, zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T))
+    AccCov{T}(0, zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T), zero(T))
 end
 
 function (acc::AccCov{T})() where {T}
@@ -128,8 +130,10 @@ function (acc::AccCov{T})(x::T, y::T) where {T}
     acc.nobs += 1
     acc.xsum += x
     acc.ysum += y
-    acc.dx = x - acc.xmean
-    acc.dy = y - acc.ymean
+    acc.dx = ifelse(acc.nobs>1, x - acc.x, zero(T))
+    acc.dy = ifelse(acc.nobs>1, y - acc.y, zero(T))
+    acc.x = x
+    acc.y = y
     acc.xmean += acc.dx / acc.nobs
     acc.ymean += acc.dy / acc.nobs
     acc.dxdy += acc.dx * acc.dy
