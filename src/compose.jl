@@ -423,9 +423,12 @@ mutable struct AccumMeanVar{T} <: Accumulator{T}
     nobs::Int
     mean::T
     svar::T
-    AccumMeanVar(::Type{T}=Float64) where {T} = new{T}(0, zero(T), zero(T))
 end
 
+function AccumMeanVar(::Type{T}=Float64) where {T}
+    AccumMeanVar{T}(0, zero(T), zero(T))
+end
+                                                       
 function (accum::AccumMeanVar{T})() where {T}
     unbiased_var = accum.svar / (accum.nobs - 1)
     (accum.mean, unbiased_var)
