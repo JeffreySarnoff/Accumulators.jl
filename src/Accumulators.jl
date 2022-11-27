@@ -51,11 +51,16 @@ elseif haskey(ENV, "AccumulatorNumType")
         accumulator_type = defaultnumtype
     end
 end
-const AccNum = accumulator_type    
+const AccNum = accumulator_type
 
 #
 
 abstract type Accumulator{T} <:Function end
+
+const Seq = Union{AbstractVector{T}, Tuple{Vararg{T}}} where {T}
+
+seq(x::AbstractVector{T}) where {T} = x
+seq(x::NTuple{N,T}) where {N,T} = x
 
 logabs(x) = log(abs(x))
 sumlogabs(xs::A) where {T, A<:AbstractVector{T}} = vsum(map(logabs, xs))
