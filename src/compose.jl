@@ -49,9 +49,6 @@ end
 
 Base.minimum(acc::AccExtrema) = acc.min
 Base.maximum(acc::AccExtrema) = acc.max
-StatsBase.mean(acc::AccGeoMean) = acc()
-StatsBase.mean(acc::AccHarmMean) = acc()
-
 midrange(acc::AccExtrema) = (acc.min / 2) + (acc.max / 2)
 proportionalrange(acc::AccExtrema, proportion) = (acc.min * proportion) + (acc.max * (1 - proportion))
 
@@ -60,6 +57,18 @@ nminima(acc::AccExtrema) = acc.nmin
 nmaxima(acc::AccMinimum) = acc.nmax
 nmaxima(acc::AccExtrema) = acc.nmax
 
+StatsBase.mean(acc::AccMeanVar) = acc.mean
+StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.n - 1)
+StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.n - 1))
+
+#=                                              
+acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
+acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
+acc_std(acc::AccStats{T}) where {T} = T(sqrt(acc_var(acc)))
+acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
+
+=#
 # Count
 
 mutable struct AccCount{T} <: Accumulator{T}
@@ -407,26 +416,27 @@ function (acc::AccHarmMean{T})(xs::NTuple{N,T}) where {T, N}
     acc
 end
 
+# Unbiased Sample Variation (with Mean)
+# see https://www.johndcook.com/blog/standard_deviation/
+
+mutable struct AccumMeanVar{T} <: Accumulator{T}
+    nobs::Int
+    mean::T
+    svar::T
+    AccumMeanVar(::Type{T}=Float64) where {T} = new{T}(0, zero(T), zero(T))
+end
+
+function (accum::AccumMeanVar{T})() where {T}
+    unbiased_var = accum.svar / (accum.nobs - 1)
+    (accum.mean, unbiased_var)
+end
+
+function (accum::AccumMeanVar{T})(x) where {T}
+    oldmean = accum.mean
+    accum.mean = oldmean + (x - oldmean) / accum.nobs
+    accum.svar = accum.svar + (x - oldmean) * (x - accum.mean)
+    accum
+end
+
 #
-#
-                                                                      
-acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
-acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
-acc_std(acc::AccStats{T}) where {T} = T(sqrt(acc_var(acc)))
-acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
-                                                                      
-acc_mean(acc::AccMean{T}) where {T} = acc.mean
-acc_mean(acc::AccGeometricMean{T}) where {T} = acc()
-acc_mean(acc::AccHarmonicMean{T}) where {T} = acc()
-
-acc_mean(acc::AccMeanVar{T}) where {T} = acc.mean
-acc_var(acc::AccMeanVar{T}) where {T} = acc.svar / (acc.n - 1)
-acc_std(acc::AccMeanVar{T}) where {T} = sqrt(acc.svar / (acc.n - 1))
-
-acc_mean(acc::AccExpWtMean{T}) where {T} = acc.mean
-
-acc_mean(acc::AccExpWtMeanVar{T}) where {T} = acc.mean
-acc_var(acc::AccExpWtMeanVar{T}) where {T} = acc.svar / (acc.n - 1)
-acc_std(acc::AccExpWtMeanVar{T}) where {T} = sqrt(acc_var(acc))
 
