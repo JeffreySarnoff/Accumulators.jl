@@ -130,11 +130,11 @@ function (acc::AccCov{T})(x::T, y::T) where {T}
     acc.ysum += y
     acc.dx = x - acc.xmean
     acc.dy = y - acc.ymean
-    acc.xmean += dx / acc.nobs
-    acc.ymean += dy / acc.nobs
-    acc.dxdy += dx*dy
+    acc.xmean += acc.dx / acc.nobs
+    acc.ymean += acc.dy / acc.nobs
+    acc.dxdy += acc.dx * acc.dy
     acc.dxdy = ifelse(!isfinite(acc.dxdy), zero(T), acc.dxdy)
-    acc.xy += x*y
+    acc.xy += x * y
     acc.xy = ifelse(!isfinite(acc.xy), zero(T), acc.xy)
     acc.c += ifelse(acc.nobs === 1, zero(T), dx * dy)
     acc
