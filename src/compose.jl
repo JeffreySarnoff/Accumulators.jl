@@ -83,18 +83,13 @@ function (acc::AccCount{T})() where {T}
     acc.nobs
 end
      
-function (acc::AccCount{T})(x) where {T}
+function (acc::AccCount{T})(x::T) where {T}
     acc.nobs += one(T)
     acc
 end
 
-function (acc::AccCount{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccCount{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)
-    acc
-end
-
-function (acc::AccCount{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
     acc
 end
 
@@ -123,19 +118,9 @@ function (acc::AccMinimum{T})(x) where {T}
     acc
 end
 
-function (acc::AccMinimum{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccMinimum{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)     
     x = vminimum(xs)
-    if x < acc.min
-        acc.nmin += 1
-        acc.min = x
-    end
-    acc
-end
-
-function (acc::AccMinimum{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
-    x = minimum(xs)
     if x < acc.min
         acc.nmin += 1
         acc.min = x
@@ -168,19 +153,9 @@ function (acc::AccMaximum{T})(x) where {T}
     acc
 end
 
-function (acc::AccMaximum{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccMaximum{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)     
     x = vmaximum(xs)
-    if x > acc.max
-        acc.nmax += 1
-        acc.max = x
-    end
-    acc
-end
-
-function (acc::AccMaximum{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
-    x = maximum(xs)
     if x > acc.max
         acc.nmax += 1
         acc.max = x
@@ -215,23 +190,9 @@ function (acc::AccExtrema{T})(x) where {T}
     acc
 end
 
-function (acc::AccExtrema{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccExtrema{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)     
     mn, mx = vextrema(xs)
-    if mn < acc.min
-        acc.nmin += 1
-        acc.min = mn
-    end
-    if mx > acc.max
-        acc.nmax += 1
-        acc.max = mx
-    end
-    acc
-end
-
-function (acc::AccExtrema{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
-    mn, mx = extrema(xs)
     if mn < acc.min
         acc.nmin += 1
         acc.min = mn
@@ -264,16 +225,9 @@ function (acc::AccSum{T})(x) where {T}
     acc
 end
 
-function (acc::AccSum{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccSum{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)     
     x = vsum(xs)
-    acc.sum += x
-    acc
-end
-
-function (acc::AccSum{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
-    x = sum(xs)
     acc.sum += x
     acc
 end
@@ -299,16 +253,9 @@ function (acc::AccProd{T})(x) where {T}
     acc
 end
 
-function (acc::AccProd{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccProd{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)     
     x = vprod(xs)
-    acc.prod *= x
-    acc
-end
-
-function (acc::AccProd{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
-    x = prod(xs)
     acc.prod *= x
     acc
 end
@@ -334,16 +281,9 @@ function (acc::AccMean{T})(x) where {T}
     acc
 end
 
-function (acc::AccMean{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccMean{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)     
     xmean = vmean(xs)
-    acc.mean += (xmean - acc.mean) / acc.nobs
-    acc
-end
-
-function (acc::AccMean{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
-    xmean = mean(xs)
     acc.mean += (xmean - acc.mean) / acc.nobs
     acc
 end
@@ -370,14 +310,8 @@ function (acc::AccGeoMean{T})(x) where {T}
     acc
 end
 
-function (acc::AccGeoMean{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccGeoMean{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)
-    acc.sumlog += sum(map(logabs, xs))
-    acc
-end
-
-function (acc::AccGeoMean{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
     acc.sumlog += sum(map(logabs, xs))
     acc
 end
@@ -404,14 +338,8 @@ function (acc::AccHarmMean{T})(x) where {T}
     acc
 end
 
-function (acc::AccHarmMean{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccHarmMean{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)
-    acc.invhmean += sum(map(inv, xs))
-    acc
-end
-
-function (acc::AccHarmMean{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
     acc.invhmean += sum(map(inv, xs))
     acc
 end
@@ -442,7 +370,7 @@ function (acc::AccMeanVar{T})(x) where {T}
     acc
 end
 
-function (acc::AccMeanVar{T})(xs::A) where {T, A<:AbstractVector{T}}
+function (acc::AccMeanVar{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)
     prior_mean = acc.mean
     xmean = vmean(xs)
@@ -450,12 +378,5 @@ function (acc::AccMeanVar{T})(xs::A) where {T, A<:AbstractVector{T}}
     acc
 end
 
-function (acc::AccMeanVar{T})(xs::NTuple{N,T}) where {T, N}
-    acc.nobs += N
-    prior_mean = acc.mean
-    xmean = mean(xs)
-    acc.mean += (xmean - prior_mean) / acc.nobs
-    acc
-end
 #
 
