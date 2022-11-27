@@ -428,13 +428,13 @@ end
 function AccMeanVar(::Type{T}=Float64) where {T}
     AccMeanVar{T}(0, zero(T), zero(T))
 end
-                                                       
+
 function (acc::AccMeanVar{T})() where {T}
     unbiased_var = acc.svar / (acc.nobs - 1)
     (acc.mean, unbiased_var)
 end
 
-function (acc::AccumMeanVar{T})(x) where {T}
+function (acc::AccMeanVar{T})(x) where {T}
     acc.nobs += 1
     prior_mean = acc.mean
     acc.mean = oldmean + (x - prior_mean) / acc.nobs
