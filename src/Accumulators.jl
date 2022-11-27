@@ -21,11 +21,13 @@ export Accumulator,
 
     AccMeanMag, AccGeoMeanMag, AccHarmMeanMag,
     AccMeanVarMag, AccMeanStdMag, AccStatsMag,
-    
+
     AccExpWtMean, AccExpWtMeanVar,
     AccMinAbs, AccMinAbs2, AccMaxAbs, AccMaxAbs2,
     AccSumAbs, AccSumAbs2, AccProdAbs, AccProdAbs2, 
     AccMeanAbs, AccMeanAbs2, AccMeanVarAbs, AccMeanVarAbs2,
+    # for paired data streams
+    AccCov, AccCorr,
     # Accum is Acc with a prespecified function applied to each new 'x'
     AccumMin, AccumMax, AccumExtrema,
     AccumSum, AccumProd,
