@@ -67,7 +67,7 @@ mutable struct AccCorr{T} <: Accumulator{T}
 end
 
 function AccCorr(::Type{T}=Float64) where {T}
-    AccCov{T}(0, zero(T), zero(T), zero(T), zero(T), zero(T))
+    AccCorr{T}(0, zero(T), zero(T), zero(T), zero(T), zero(T))
 end
 
 function (acc::AccCorr{T})() where {T}
@@ -77,7 +77,7 @@ function (acc::AccCorr{T})() where {T}
     corr / (unbiased_xvar * unbiased_yvar)
 end
 
-function (acc::AccCov{T})(x, y) where {T}
+function (acc::AccCorr{T})(x, y) where {T}
     acc.nobs += 1
     prior_xmean = acc.xmean
     dx = x - prior_xmean
