@@ -77,7 +77,7 @@ function (acc::AccCorr{T})() where {T}
     corr / (unbiased_xvar * unbiased_yvar)
 end
 
-function (acc::AccCorr{T})(x, y) where {T}
+function (acc::AccCorr{T})(x::T, y::T) where {T}
     acc.nobs += 1
     prior_xmean = acc.xmean
     dx = x - prior_xmean
@@ -99,11 +99,11 @@ function (acc::AccCorr{T})(xs::Seq{T}, ys::Seq{T}) where {T}
     xmean = vmean(xs)
     dx = xmean - acc.xmean
     acc.xmean += dx / acc.nobs
-    acc.xsvar = acc.xsvar + (x - prior_xmean) * (x - acc.xmean)
+    acc.xsvar = acc.xsvar + (xmean - prior_xmean) * (xmean - acc.xmean)
     ymean = vmean(ys)
     dy = ymean - acc.ymean
     acc.ymean += dy / acc.nobs
-    acc.ysvar = acc.ysvar + (y - prior_ymean) * (y - acc.ymean)
+    acc.ysvar = acc.ysvar + (ymean - prior_ymean) * (ymean - acc.ymean)
     acc.c += dx * dy
     acc
 end
