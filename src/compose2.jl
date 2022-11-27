@@ -91,7 +91,7 @@ function (acc::AccCov{T})(x, y) where {T}
     acc
 end
 
-function (acc::AccCov{T})(xs::Seq{T}, ys::Seq{T}) where {T}
+function (acc::AccCorr{T})(xs::Seq{T}, ys::Seq{T}) where {T}
     if length(xs) !== length(ys) 
         throw(ArgumentError(string("lengths must be equal (", n, " != ", length(ys), ")")))
     end
