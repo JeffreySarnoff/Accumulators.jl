@@ -57,7 +57,7 @@ end
 
 # Corr
 
-mutable struct AccCorr{T} <: Accumulator{T}
+mutable struct AccCor{T} <: Accumulator{T}
     nobs::Int
     xmean::T
     ymean::T
@@ -66,18 +66,18 @@ mutable struct AccCorr{T} <: Accumulator{T}
     c::T
 end
 
-function AccCorr(::Type{T}=Float64) where {T}
-    AccCorr{T}(0, zero(T), zero(T), zero(T), zero(T), zero(T))
+function AccCor(::Type{T}=Float64) where {T}
+    AccCor{T}(0, zero(T), zero(T), zero(T), zero(T), zero(T))
 end
 
-function (acc::AccCorr{T})() where {T}
+function (acc::AccCor{T})() where {T}
     corr = acc.c / (acc.nobs - 1)
     unbiased_xvar = acc.xsvar / (acc.nobs - 1)
     unbiased_yvar = acc.ysvar / (acc.nobs - 1)
     corr / (unbiased_xvar * unbiased_yvar)
 end
 
-function (acc::AccCorr{T})(x::T, y::T) where {T}
+function (acc::AccCor{T})(x::T, y::T) where {T}
     acc.nobs += 1
     prior_xmean = acc.xmean
     dx = x - prior_xmean
