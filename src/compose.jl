@@ -38,36 +38,6 @@ names used in StatsBase
 :zscore
 =#
 
-StatsBase.nobs(acc::A) where {T, A<:Accumulator{T}} = acc.nobs
-
-for (F,A) in ((:(Base.minimum), :AccMinimum), (:(Base.maximum), :AccMaximum), (:(Base.extrema), :AccExtrema),
-              (:(Base.sum), :AccSum), (:(Base.prod), :AccProd),
-              (:(StatsBase.mean), :AccMean), :(StatsBase.geomean), :AccGeoMean), :(StatsBase.harmmean), :AccHarmMean),
-     )
-     @eval $F(acc::$A) = acc()
-end
-
-Base.minimum(acc::AccExtrema) = acc.min
-Base.maximum(acc::AccExtrema) = acc.max
-midrange(acc::AccExtrema) = (acc.min / 2) + (acc.max / 2)
-proportionalrange(acc::AccExtrema, proportion) = (acc.min * proportion) + (acc.max * (1 - proportion))
-
-nminima(acc::AccMinimum) = acc.nmin
-nminima(acc::AccExtrema) = acc.nmin
-nmaxima(acc::AccMinimum) = acc.nmax
-nmaxima(acc::AccExtrema) = acc.nmax
-
-StatsBase.mean(acc::AccMeanVar) = acc.mean
-StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.nobs - 1)
-StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.nobs - 1))
-
-count(acc::AccStats{T})() where {T} = acc.nobs
-StatsBase.mean(acc::AccStats{T})() where {T} = T(acc.m1)
-StatsBase.var(acc::AccStats{T})() where {T} = T(acc.m2 / (acc.nobs - 1))
-StatsBase.std(acc::AccStats{T})() where {T} = T(sqrt(var(x)))
-StatsBase.skewness(acc::AccStats{T})() where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-StatsBase.kurtosis(acc::AccStats{T})() where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
-
 # Count
 
 mutable struct AccCount{T} <: Accumulator{T}
@@ -537,4 +507,33 @@ function (acc::AccExpWtMeanStd{T})(xs::Seq{T}) where {T}
     end
     acc
 end
+
+StatsBase.nobs(acc::A) where {T, A<:Accumulator{T}} = acc.nobs
+
+for (F,A) in ((:(Base.minimum), :AccMinimum), (:(Base.maximum), :AccMaximum), (:(Base.extrema), :AccExtrema),
+              (:(Base.sum), :AccSum), (:(Base.prod), :AccProd),
+              (:(StatsBase.mean), :AccMean), (:(StatsBase.geomean), :AccGeoMean), (:(StatsBase.harmmean), :AccHarmMean))
+     @eval $F(acc::$A) = acc()
+end
+
+Base.minimum(acc::AccExtrema) = acc.min
+Base.maximum(acc::AccExtrema) = acc.max
+midrange(acc::AccExtrema) = (acc.min / 2) + (acc.max / 2)
+proportionalrange(acc::AccExtrema, proportion) = (acc.min * proportion) + (acc.max * (1 - proportion))
+
+nminima(acc::AccMinimum) = acc.nmin
+nminima(acc::AccExtrema) = acc.nmin
+nmaxima(acc::AccMinimum) = acc.nmax
+nmaxima(acc::AccExtrema) = acc.nmax
+
+StatsBase.mean(acc::AccMeanVar) = acc.mean
+StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.nobs - 1)
+StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.nobs - 1))
+
+count(acc::AccStats{T})() where {T} = acc.nobs
+StatsBase.mean(acc::AccStats{T})() where {T} = T(acc.m1)
+StatsBase.var(acc::AccStats{T})() where {T} = T(acc.m2 / (acc.nobs - 1))
+StatsBase.std(acc::AccStats{T})() where {T} = T(sqrt(var(x)))
+StatsBase.skewness(acc::AccStats{T})() where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+StatsBase.kurtosis(acc::AccStats{T})() where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
 
