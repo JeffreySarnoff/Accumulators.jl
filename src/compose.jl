@@ -396,6 +396,17 @@ function (acc::AccStats{T})() where {T}
     (count=count(acc), mean=mean(acc), var=var(acc), std=std(acc), skewness=skewness(acc), kurtosis=kurtosis(acc))
 end
 
+#=
+                                                  
+function (acc::AccMeanVar{T})(x::T) where {T}
+    acc.nobs += 1
+    prior_mean = acc.mean
+    acc.mean = prior_mean + (x - prior_mean) / acc.nobs
+    acc.svar = acc.svar + (x - prior_mean) * (x - acc.mean)
+    acc
+end
+=#
+                                                  
 function (acc::AccStats{T})(x) where {T}
     n1 = acc.nobs
     acc.nobs += 1
