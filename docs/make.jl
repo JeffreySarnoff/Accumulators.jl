@@ -7,7 +7,7 @@ makedocs(
     pages = Any[
         "Overview" => "index.md",
         "Guide" => "guide.md",
-        "Supported Operations" => "supports.md",
+        "Supported Operations" => "operations.md",
         "Refs" => "references.md"
     ]
 )
