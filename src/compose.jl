@@ -359,7 +359,7 @@ end
 
 function (acc::AccMeanVar{T})() where {T}
     unbiased_var = acc.svar / (acc.nobs - 1)
-    (acc.mean, unbiased_var)
+    (mean=acc.mean, var=unbiased_var)
 end
 
 function (acc::AccMeanVar{T})(x::T) where {T}
@@ -375,7 +375,75 @@ function (acc::AccMeanVar{T})(xs::Seq{T}) where {T}
     prior_mean = acc.mean
     xmean = vmean(xs)
     acc.mean += (xmean - prior_mean) / acc.nobs
+    acc.svar = acc.svar + (x - prior_mean) * (x - xmean)
     acc
 end
 
-#
+mutable struct AccMeanStd{T} <: Accumulator{T}
+    nobs::Int
+    mean::T
+    svar::T
+end
+
+function AccMeanStd(::Type{T}=Float64) where {T}
+    AccMeanVar{T}(0, zero(T), zero(T))
+end
+
+function (acc::AccMeanStd{T})() where {T}
+    unbiased_std = sqrt(acc.svar / (acc.nobs - 1))
+    (mean=acc.mean, std=unbiased_std)
+end
+
+function (acc::AccMeanStd{T})(x::T) where {T}
+    acc.nobs += 1
+    prior_mean = acc.mean
+    acc.mean = prior_mean + (x - prior_mean) / acc.nobs
+    acc.svar = acc.svar + (x - prior_mean) * (x - acc.mean)
+    acc
+end
+
+function (acc::AccMeanStd{T})(xs::Seq{T}) where {T}
+    acc.nobs += length(xs)
+    prior_mean = acc.mean
+    xmean = vmean(xs)
+    acc.mean += (xmean - prior_mean) / acc.nobs
+    acc.svar = acc.svar + (x - prior_mean) * (x - xmean)
+    acc
+end
+
+# see https://www.johndcook.com/blog/skewness_kurtosis/
+
+mutable struct AccStats{T} <: Accumulator{T}
+    n::Int
+    m1::T
+    m2::T
+    m3::T
+    m4::T
+    AccStats(::Type{T}=Float64) where {T} = new{T}(0, zero(T), zero(T), zero(T), zero(T))
+end
+
+function (acc::AccStats{T})() where {T}
+    (count=count(acc), mean=mean(acc), var=var(acc), std=std(acc), skew=skew(acc), kurt=kurt(acc))
+end
+
+function (acc::AccStats{T})(x) where {T}
+    n1 = acc.n
+    acc.n += 1
+    delta = x - acc.m1
+    delta_n = delta / acc.n
+    delta_n2 = delta_n^2
+    term1 = delta * delta_n * n1
+    acc.m1 += delta_n
+    acc.m4 += term1 * delta_n2 * (acc.n^2 - 3*acc.n + 3) + 
+              6 * delta_2 * acc.m2 - 
+              4 * delta_n * acc.m3
+    acc.m3 += term1 * delta_n * (n - 2) - 3 * delta_n * acc.m2
+    acc.m2 += term1
+end
+
+count(acc::AccStats{T})() where {T} = acc.n
+StatsBase.mean(acc::AccStats{T})() where {T} = T(acc.m1)
+StatsBase.var(acc::AccStats{T})() where {T} = T(acc.m2 / (acc.n - 1))
+StatsBase.std(acc::AccStats{T})() where {T} = T(sqrt(var(x)))
+StatsBase.skew(acc::AccStats{T})() where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+StatsBase.kurt(acc::AccStats{T})() where {T} = T( ((acc.n * acc.m4) / (acc.m2^2)) - 3)
