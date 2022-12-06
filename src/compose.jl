@@ -541,6 +541,28 @@ StatsBase.mean(acc::AccMeanVar) = acc.mean
 StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.nobs - 1)
 StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.nobs - 1))
 
+Base.length(acc::Accumulator) = acc.nobs
+
+struct AccumData{T}
+    acc::Accumulator{T}
+    data::Seq{T}
+end
+
+function Base.iterate(accumdata::AccumData{T}) where {T}
+     datastate = (first(accumdata.data), ifelse(length(accumdata.data) > 1, 2, nothing))
+     accstate  = (accumdata.acc(datastate[1]), 2)
+     (accumdata, datastate)
+end
+function Base.iterate(accumdata::AccumData{T}, state) where {T}
+     datastate = ifelse(isnothing(state), nothing, accumdata.data[state])
+     state = ifelse(length(accumdata.data) > state, state+1, nothing)
+     ifelse(!isnothing(datastate), accumdata.acc(datastate), nothing)
+     (accumdata, state)
+end
+                                        
+           
+     
+    
 count(acc::AccStats{T}) where {T} = acc.nobs
 StatsBase.mean(acc::AccStats{T}) where {T} = T(acc.m1)
 StatsBase.var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.nobs - 1))
