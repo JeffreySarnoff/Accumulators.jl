@@ -65,17 +65,9 @@ count(acc::AccStats{T})() where {T} = acc.nobs
 StatsBase.mean(acc::AccStats{T})() where {T} = T(acc.m1)
 StatsBase.var(acc::AccStats{T})() where {T} = T(acc.m2 / (acc.nobs - 1))
 StatsBase.std(acc::AccStats{T})() where {T} = T(sqrt(var(x)))
-StatsBase.skew(acc::AccStats{T})() where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-StatsBase.kurt(acc::AccStats{T})() where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
+StatsBase.skewness(acc::AccStats{T})() where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+StatsBase.kurtosis(acc::AccStats{T})() where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
 
-#=                                              
-acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
-acc_var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.n - 1))
-acc_std(acc::AccStats{T}) where {T} = T(sqrt(acc_var(acc)))
-acc_skew(acc::AccStats{T}) where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-acc_kurt(acc::AccStats{T}) where {T} = T((acc.n * acc.m4) / (acc.m2^2) - 3)
-
-=#
 # Count
 
 mutable struct AccCount{T} <: Accumulator{T}
@@ -431,7 +423,7 @@ end
 AccStats(::Type{T}=Float64) where {T} = AccStats(0, zero(T), zero(T), zero(T), zero(T))
 
 function (acc::AccStats{T})() where {T}
-    (count=count(acc), mean=mean(acc), var=var(acc), std=std(acc), skew=skew(acc), kurt=kurt(acc))
+    (count=count(acc), mean=mean(acc), var=var(acc), std=std(acc), skewness=skewness(acc), kurtosis=kurtosis(acc))
 end
 
 function (acc::AccStats{T})(x) where {T}
