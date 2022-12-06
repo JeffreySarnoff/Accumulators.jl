@@ -7,7 +7,8 @@ export Accumulator,
     AccSum, AccProd,
     AccMean, AccGeoMean, AccHarmMean,
     AccMeanVar, AccMeanStd, AccStats,
-
+    AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd,
+#=
     AccMinimumAbs, AccMaximumAbs, AccExtremaAbs,
     AccSumAbs, AccProdAbs,
 
@@ -35,9 +36,7 @@ export Accumulator,
     AccumMeanVar,
     AccumStats,
     AccumExpWtMean, AccumExpWtMeanVar,
-    # acc_ are convienice getters for appropriate accumulators
-    acc_count, acc_min, acc_max, acc_nmin, acc_nmax, acc_midrange,
-    acc_mean, acc_var, acc_std, acc_skew, acc_kurt
+=#
 
 using LoopVectorization: @turbo, @tturbo
 using VectorizedStatistics
