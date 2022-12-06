@@ -426,8 +426,9 @@ mutable struct AccStats{T} <: Accumulator{T}
     m2::T
     m3::T
     m4::T
-    AccStats(::Type{T}=Float64) where {T} = new{T}(0, zero(T), zero(T), zero(T), zero(T))
 end
+
+AccStats(::Type{T}=Float64) where {T} = AccStats(0, zero(T), zero(T), zero(T), zero(T))
 
 function (acc::AccStats{T})() where {T}
     (count=count(acc), mean=mean(acc), var=var(acc), std=std(acc), skew=skew(acc), kurt=kurt(acc))
@@ -451,8 +452,68 @@ end
 function (acc::AccStats{T})(xs::Seq{T}) where {T}
     for x in xs
         acc(x)
-    end                                                                  
+    end
     acc
 end
-                                                            
+
+#=
+reference for AccExpWtMean, AccExpWtMeanVar
+
+Incremental calculation of weighted mean and variance
+by Tony Finch
+=#
+
+mutable struct AccExpWtMean{T} <: Accumulator{T}
+    nobs::Int
+    alpha::T
+    expwtmean::T
+end
+
+AccExpWtMean(::Type{T}=Float64; alpha::T=0.5) where {T} = new{T}(0, T(alpha), zero(T))
+
+(acc::AccExpWtMean{T})() where {T} = acc.expwtmean
+
+function (acc::AccExpWtMean{T})(x) where {T}
+    acc.nobs += 1
+    acc.expwtmean += acc.alpha * (x - acc.expwtmean)
+    acc
+end
+
+function (acc::AccExpWtMean{T})(xs::Seq{T}) where {T}
+    for x in xs
+        acc(x)
+    end
+    acc
+end
+
+mutable struct AccExpWtMeanVar{T} <: Accumulator{T}
+    nobs::Int
+    alpha::T
+    expwtmean::T
+    expwtsvar::T
+end
+
+AccExpWtMeanVar(::Type{T}=Float64; alpha::T=0.5) where {T} = AccExpWtMeanVar(0, alpha, zero(T), zero(T))
+
+function(acc::AccExpWtMeanVar{T})() where {T}
+    unbiased_expwtvar = acc.expwtsvar / (acc.nobs - 1)
+    (acc.expwtmean, unbiased_expwtvar)
+end
+
+function (acc::AccExpWtMeanVar{T})(x) where {T}
+    acc.nobs += 1
+    diff = x - acc.expwtmean
+    incr = acc.alpha * diff
+    acc.expwtmean += acc.alpha * (x - acc.expwtmean)
+    acc.expwtsvar = (one(T) - acc.alpha) * (acc.expwtsvar + diff * incr)
+    acc
+end
+
+function (acc::AccExpWtMeanVar{T})(xs::Seq{T}) where {T}
+    for x in xs
+        acc(x)
+    end
+    acc
+end
+                                        
                                                             
