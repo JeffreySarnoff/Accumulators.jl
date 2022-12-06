@@ -530,10 +530,10 @@ StatsBase.mean(acc::AccMeanVar) = acc.mean
 StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.nobs - 1)
 StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.nobs - 1))
 
-count(acc::AccStats{T})() where {T} = acc.nobs
-StatsBase.mean(acc::AccStats{T})() where {T} = T(acc.m1)
-StatsBase.var(acc::AccStats{T})() where {T} = T(acc.m2 / (acc.nobs - 1))
-StatsBase.std(acc::AccStats{T})() where {T} = T(sqrt(var(x)))
-StatsBase.skewness(acc::AccStats{T})() where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-StatsBase.kurtosis(acc::AccStats{T})() where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
+count(acc::AccStats{T}) where {T} = acc.nobs
+StatsBase.mean(acc::AccStats{T}) where {T} = T(acc.m1)
+StatsBase.var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.nobs - 1))
+StatsBase.std(acc::AccStats{T}) where {T} = T(sqrt(var(x)))
+StatsBase.skewness(acc::AccStats{T}) where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+StatsBase.kurtosis(acc::AccStats{T}) where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
 
