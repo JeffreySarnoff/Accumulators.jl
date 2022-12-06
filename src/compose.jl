@@ -58,8 +58,15 @@ nmaxima(acc::AccMinimum) = acc.nmax
 nmaxima(acc::AccExtrema) = acc.nmax
 
 StatsBase.mean(acc::AccMeanVar) = acc.mean
-StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.n - 1)
-StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.n - 1))
+StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.nobs - 1)
+StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.nobs - 1))
+
+count(acc::AccStats{T})() where {T} = acc.nobs
+StatsBase.mean(acc::AccStats{T})() where {T} = T(acc.m1)
+StatsBase.var(acc::AccStats{T})() where {T} = T(acc.m2 / (acc.nobs - 1))
+StatsBase.std(acc::AccStats{T})() where {T} = T(sqrt(var(x)))
+StatsBase.skew(acc::AccStats{T})() where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
+StatsBase.kurt(acc::AccStats{T})() where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
 
 #=                                              
 acc_mean(acc::AccStats{T}) where {T} = T(acc.m1)
@@ -414,7 +421,7 @@ end
 # see https://www.johndcook.com/blog/skewness_kurtosis/
 
 mutable struct AccStats{T} <: Accumulator{T}
-    n::Int
+    nobs::Int
     m1::T
     m2::T
     m3::T
@@ -427,10 +434,10 @@ function (acc::AccStats{T})() where {T}
 end
 
 function (acc::AccStats{T})(x) where {T}
-    n1 = acc.n
-    acc.n += 1
+    n1 = acc.nobs
+    acc.nobs += 1
     delta = x - acc.m1
-    delta_n = delta / acc.n
+    delta_n = delta / acc.nobs
     delta_n2 = delta_n^2
     term1 = delta * delta_n * n1
     acc.m1 += delta_n
@@ -441,9 +448,11 @@ function (acc::AccStats{T})(x) where {T}
     acc.m2 += term1
 end
 
-count(acc::AccStats{T})() where {T} = acc.n
-StatsBase.mean(acc::AccStats{T})() where {T} = T(acc.m1)
-StatsBase.var(acc::AccStats{T})() where {T} = T(acc.m2 / (acc.n - 1))
-StatsBase.std(acc::AccStats{T})() where {T} = T(sqrt(var(x)))
-StatsBase.skew(acc::AccStats{T})() where {T} = T(sqrt(acc.n) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
-StatsBase.kurt(acc::AccStats{T})() where {T} = T( ((acc.n * acc.m4) / (acc.m2^2)) - 3)
+function (acc::AccStats{T})(xs::Seq{T}) where {T}
+    for x in xs
+        acc(x)
+    end                                                                  
+    acc
+end
+                                                            
+                                                            
