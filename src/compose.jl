@@ -4,7 +4,7 @@
      AccSum, AccProd,
      AccMean, AccGeoMean, AccHarmMean,
      AccMeanVar, AccMeanStd, AccStats,
-     AccExpWtMean, AccExpWtMeanVar
+     AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd
 =#
 #=
 names used in StatsBase
@@ -489,7 +489,7 @@ AccExpWtMeanVar(::Type{T}=Float64; alpha::T=0.5) where {T} = AccExpWtMeanVar(0, 
 
 function(acc::AccExpWtMeanVar{T})() where {T}
     unbiased_expwtvar = acc.expwtsvar / (acc.nobs - 1)
-    (acc.expwtmean, unbiased_expwtvar)
+    (expwt_mean=acc.expwtmean, expwt_var=unbiased_expwtvar)
 end
 
 function (acc::AccExpWtMeanVar{T})(x) where {T}
@@ -507,5 +507,34 @@ function (acc::AccExpWtMeanVar{T})(xs::Seq{T}) where {T}
     end
     acc
 end
-                                        
-                                                            
+
+mutable struct AccExpWtMeanStd{T} <: Accumulator{T}
+    nobs::Int
+    alpha::T
+    expwtmean::T
+    expwtsvar::T
+end
+
+AccExpWtMeanStd(::Type{T}=Float64; alpha::T=0.5) where {T} = AccExpWtMeanStd(0, alpha, zero(T), zero(T))
+
+function(acc::AccExpWtMeanStd{T})() where {T}
+    unbiased_expwtstd = sqrt(acc.expwtsvar / (acc.nobs - 1))
+    (expwt_mean=acc.expwtmean, expwt_std=unbiased_expwtstd)
+end
+
+function (acc::AccExpWtMeanStd{T})(x) where {T}
+    acc.nobs += 1
+    diff = x - acc.expwtmean
+    incr = acc.alpha * diff
+    acc.expwtmean += acc.alpha * (x - acc.expwtmean)
+    acc.expwtsvar = (one(T) - acc.alpha) * (acc.expwtsvar + diff * incr)
+    acc
+end
+
+function (acc::AccExpWtMeanStd{T})(xs::Seq{T}) where {T}
+    for x in xs
+        acc(x)
+    end
+    acc
+end
+
