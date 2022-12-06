@@ -442,7 +442,7 @@ mutable struct AccExpWtMean{T} <: Accumulator{T}
     expwtmean::T
 end
 
-AccExpWtMean(::Type{T}=Float64; alpha::T=0.5) where {T} = new{T}(0, T(alpha), zero(T))
+AccExpWtMean(::Type{T}=Float64; alpha::T=T(0.5)) where {T} = new{T}(0, T(alpha), zero(T))
 
 (acc::AccExpWtMean{T})() where {T} = acc.expwtmean
 
@@ -466,7 +466,7 @@ mutable struct AccExpWtMeanVar{T} <: Accumulator{T}
     expwtsvar::T
 end
 
-AccExpWtMeanVar(::Type{T}=Float64; alpha::T=0.5) where {T} = AccExpWtMeanVar(0, alpha, zero(T), zero(T))
+AccExpWtMeanVar(::Type{T}=Float64; alpha::T=T(0.5)) where {T} = AccExpWtMeanVar(0, alpha, zero(T), zero(T))
 
 function(acc::AccExpWtMeanVar{T})() where {T}
     unbiased_expwtvar = acc.expwtsvar / (acc.nobs - 1)
@@ -496,7 +496,7 @@ mutable struct AccExpWtMeanStd{T} <: Accumulator{T}
     expwtsvar::T
 end
 
-AccExpWtMeanStd(::Type{T}=Float64; alpha::T=0.5) where {T} = AccExpWtMeanStd(0, alpha, zero(T), zero(T))
+AccExpWtMeanStd(::Type{T}=Float64; alpha::T=T(0.5)) where {T} = AccExpWtMeanStd(0, alpha, zero(T), zero(T))
 
 function(acc::AccExpWtMeanStd{T})() where {T}
     unbiased_expwtstd = sqrt(acc.expwtsvar / (acc.nobs - 1))
