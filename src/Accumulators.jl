@@ -40,6 +40,7 @@ export Accumulator,
 
 using LoopVectorization: @turbo, @tturbo
 using VectorizedStatistics
+using Chain
 
 #
 
