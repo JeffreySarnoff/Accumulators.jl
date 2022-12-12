@@ -57,7 +57,7 @@ const AccNum = accumulator_type
 
 #
 
-abstract type Accumulator{T} <:Function end
+abstract type Accumulator{T} <: Function end
 
 const Seq = Union{AbstractVector{T}, Tuple{Vararg{T}}} where {T}
 
