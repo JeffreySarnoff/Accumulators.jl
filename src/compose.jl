@@ -577,5 +577,4 @@ StatsBase.var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.nobs - 1))
 StatsBase.std(acc::AccStats{T}) where {T} = T(sqrt(var(acc)))
 StatsBase.skewness(acc::AccStats{T}) where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
 StatsBase.kurtosis(acc::AccStats{T}) where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
-                                        
-           
+
