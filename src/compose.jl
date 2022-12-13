@@ -313,7 +313,7 @@ function (acc::AccHarmMean{T})(xs::Seq{T}) where {T}
     acc
 end
 
-# Generalized Mean
+# Generalized Mean (defaults to Quadratic Mean [root-mean-squared])
 
 mutable struct AccGenMean{T} <: Accumulator{T}
     nobs::Int       # count each observation
@@ -322,8 +322,8 @@ mutable struct AccGenMean{T} <: Accumulator{T}
     const rpwr::T   # reciprocal of power
 end
 
-function AccGenMean(::Type{T}=AccNum; pwr::Real) where {T}
-    AccGenMean{T}(0, zero(T), T(pwr), T(1/pwr))
+function AccGenMean(::Type{T}=AccNum, power::Real=2.0) where {T}
+    AccGenMean{T}(0, zero(T), T(power), T(1/power))
 end
                                         
 function (acc::AccGenMean{T})() where {T}
