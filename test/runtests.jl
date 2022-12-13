@@ -1,4 +1,9 @@
-using Accumulators, StatsBase, Test
+using Accumulators, StatsBase, Random, Test
+
+rng = Xoshiro(1618);
+ns = (4,16,63,255);
+urands = rand.(rng, ns);
+nrands = randn.(rng, ns);
 
 ≐(a, b) = isapprox(a, b; rtol=eps(a)^0.75)
 
