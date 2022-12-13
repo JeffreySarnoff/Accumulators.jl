@@ -24,8 +24,11 @@ acc = AccStats(Float32)
 for i in eachindex(data_sequence)
     acc( data_sequence[i] )
 end
-acc()
-# (mean = 6.8f0, var = 42.7f0, std = 6.534524f0, skewness = 1.2196333f0, kurtosis = -0.1658349f0)
+
+stats = acc()
+# (nobs = 200, mean = -0.09, var = 0.96, std = 0.98, skewness = -0.08, kurtosis = -0.01)
+stats.std
+# 0.98
 
 ### Two-variable Statistics
 
