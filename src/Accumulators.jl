@@ -5,7 +5,7 @@ export Accumulator,
     AccCount,
     AccMinimum, AccMaximum, AccExtrema,
     AccSum, AccProd,
-    AccMean, AccGeoMean, AccHarmMean,
+    AccMean, AccGeoMean, AccHarmMean, AccGenMean,
     AccMeanVar, AccMeanStd, AccStats,
     AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd,
 #=
