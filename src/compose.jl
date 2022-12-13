@@ -41,7 +41,7 @@ names used in StatsBase
 # Count
 
 mutable struct AccCount{T} <: Accumulator{T}
-    nobs::T
+    nobs::Int       # count each observation
 end
 
 function AccCount(::Type{T}=Int64) where {T}
@@ -65,9 +65,9 @@ end
 # Min
 
 mutable struct AccMinimum{T} <: Accumulator{T}
-    nobs::Int
-    nmin::Int
-    min::T
+    nobs::Int       # count each observation
+    nmin::Int       # count distinct minima
+    min::T          # current minimum
 end
 
 function AccMinimum(::Type{T}=AccNum) where {T}
@@ -100,9 +100,9 @@ end
 # Max
 
 mutable struct AccMaximum{T} <: Accumulator{T}
-    nobs::Int
-    nmax::Int
-    max::T
+    nobs::Int       # count each observation
+    nmax::Int       # count distinct maxima
+    max::T          # current maximum
 end
 
 function AccMaximum(::Type{T}=AccNum) where {T}
@@ -135,11 +135,11 @@ end
 # Extrema
 
 mutable struct AccExtrema{T} <: Accumulator{T}
-    nobs::Int
-    nmin::Int
-    nmax::Int
-    min::T
-    max::T
+    nobs::Int       # count each observation
+    nmin::Int       # count distinct minima
+    nmax::Int       # count distinct maxima
+    min::T          # current minimum
+    max::T          # current maximum
 end
 
 function AccExtrema(::Type{T}=AccNum) where {T}
@@ -176,8 +176,8 @@ end
 # Sum
 
 mutable struct AccSum{T} <: Accumulator{T}
-    nobs::Int
-    sum::T
+    nobs::Int       # count each observation
+    sum::T          # current sum
 end
 
 function AccSum(::Type{T}=AccNum) where {T}
@@ -204,8 +204,8 @@ end
 # Prod
 
 mutable struct AccProd{T} <: Accumulator{T}
-    nobs::Int
-    prod::T
+    nobs::Int       # count each observation
+    prod::T         # current product
 end
 
 function AccProd(::Type{T}=AccNum) where {T}
@@ -232,8 +232,8 @@ end
 # Mean
 
 mutable struct AccMean{T} <: Accumulator{T}
-    nobs::Int
-    mean::T
+    nobs::Int       # count each observation
+    mean::T         # current mean
 end
 
 function AccMean(::Type{T}=AccNum) where {T}
@@ -260,8 +260,8 @@ end
 # GeoMean
 
 mutable struct AccGeoMean{T} <: Accumulator{T}
-    nobs::Int
-    sumlog::T
+    nobs::Int       # count each observation
+    sumlog::T       # ∑(i=1:nobs) log(xᵢ)
 end
 
 function AccGeoMean(::Type{T}=AccNum) where {T}
@@ -288,8 +288,8 @@ end
 # HarmMean
                                    
 mutable struct AccHarmMean{T} <: Accumulator{T}
-    nobs::Int
-    invhmean::T
+    nobs::Int       # count each observation
+    invhmean::T     # 1 / current harmonic mean
 end
 
 function AccHarmMean(::Type{T}=AccNum) where {T}
@@ -317,9 +317,9 @@ end
 # see https://www.johndcook.com/blog/standard_deviation/
 
 mutable struct AccMeanVar{T} <: Accumulator{T}
-    nobs::Int
-    mean::T
-    svar::T
+    nobs::Int       # count each observation
+    mean::T         # current mean
+    svar::T         # sum of variances x[1:1=0,1:2,..,1:nobs]
 end
 
 function AccMeanVar(::Type{T}=Float64) where {T}
@@ -349,9 +349,9 @@ function (acc::AccMeanVar{T})(xs::Seq{T}) where {T}
 end
 
 mutable struct AccMeanStd{T} <: Accumulator{T}
-    nobs::Int
-    mean::T
-    svar::T
+    nobs::Int       # count each observation
+    mean::T         # current mean
+    svar::T         # sum of variances x[1:1=0,1:2,..,1:nobs]
 end
 
 function AccMeanStd(::Type{T}=Float64) where {T}
@@ -519,7 +519,8 @@ function (acc::AccExpWtMeanStd{T})(xs::Seq{T}) where {T}
     acc
 end
 
-StatsBase.nobs(acc::A) where {T, A<:Accumulator{T}} = acc.nobs
+Base.length(@nospecialize acc::Accumulator) = acc.nobs
+StatsBase.nobs(@nospecialize acc::Accumulator) = acc.nobs
 
 for (F,A) in ((:(Base.minimum), :AccMinimum), (:(Base.maximum), :AccMaximum), (:(Base.extrema), :AccExtrema),
               (:(Base.sum), :AccSum), (:(Base.prod), :AccProd),
@@ -541,32 +542,10 @@ StatsBase.mean(acc::AccMeanVar) = acc.mean
 StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.nobs - 1)
 StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.nobs - 1))
 
-Base.length(acc::Accumulator) = acc.nobs
-
-struct AccumData{T}
-    acc::Accumulator{T}
-    data::Seq{T}
-end
-
-function Base.iterate(accumdata::AccumData{T}) where {T}
-     datastate = (first(accumdata.data), ifelse(length(accumdata.data) > 1, 2, nothing))
-     accstate  = (accumdata.acc(datastate[1]), 2)
-     (accumdata, datastate)
-end
-function Base.iterate(accumdata::AccumData{T}, state) where {T}
-     datastate = ifelse(isnothing(state), nothing, accumdata.data[state])
-     state = ifelse(length(accumdata.data) > state, state+1, nothing)
-     ifelse(!isnothing(datastate), accumdata.acc(datastate), nothing)
-     (accumdata, state)
-end
-                                        
-           
-     
-    
-count(acc::AccStats{T}) where {T} = acc.nobs
 StatsBase.mean(acc::AccStats{T}) where {T} = T(acc.m1)
 StatsBase.var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.nobs - 1))
 StatsBase.std(acc::AccStats{T}) where {T} = T(sqrt(var(acc)))
 StatsBase.skewness(acc::AccStats{T}) where {T} = T(sqrt(acc.nobs) * acc.m3 / (acc.m2 * sqrt(acc.m2)))
 StatsBase.kurtosis(acc::AccStats{T}) where {T} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
-
+                                        
+           
