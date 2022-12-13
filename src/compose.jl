@@ -2,7 +2,7 @@
      AccCount, 
      AccMinimum, AccMaximum, AccExtrema, 
      AccSum, AccProd,
-     AccMean, AccGeoMean, AccHarmMean,
+     AccMean, AccGeoMean, AccHarmMean, AccGenMean,
      AccMeanVar, AccMeanStd, AccStats,
      AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd
 =#
@@ -313,6 +313,36 @@ function (acc::AccHarmMean{T})(xs::Seq{T}) where {T}
     acc
 end
 
+# Generalized Mean
+
+mutable struct AccGenMean{T} <: Accumulator{T}
+    nobs::Int       # count each observation
+    gmean::T        # current mean((xᵢ)ᵖʷʳ), i=1:nobs
+    const pwr::T    # power
+    const rpwr::T   # reciprocal of power
+end
+
+function AccGenMean(::Type{T}=AccNum; pwr::Real) where {T}
+    AccGenMean{T}(0, zero(T), T(pwr))
+end
+                                        
+function (acc::AccGenMean{T})() where {T}
+    (acc.gmean)^acc.rpwr
+end
+
+function (acc::AccGenMean{T})(x::T) where {T}
+    acc.nobs += 1
+    acc.gmean += ((x^acc.pwr) - acc.gmean) / acc.nobs
+    acc
+end
+
+function (acc::AccGenMean{T})(xs::Seq{T}) where {T}
+    acc.nobs += length(xs)     
+    xmean = vmean(map(x->x^acc.pwr, xs))
+    acc.gmean += (xmean - acc.gmean) / acc.nobs
+    acc
+end
+              
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
 
