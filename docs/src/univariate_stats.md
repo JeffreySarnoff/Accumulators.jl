@@ -57,5 +57,11 @@ Each Incremental Accumulator is applied to each element of a data sequence `x₁
 We support preapplying a function to each xᵢ as it is observed, before the observation is accumulated.
 Two examples of use are to force observations to be non-negative, or to replace any `missings` with zeros.
 
+#### How To Use
+
+Maximum Magnitude
+```
+acc = AccMaximum(Float32, abs)
+```
 
 
