@@ -323,7 +323,7 @@ mutable struct AccGenMean{T} <: Accumulator{T}
 end
 
 function AccGenMean(::Type{T}=AccNum; pwr::Real) where {T}
-    AccGenMean{T}(0, zero(T), T(pwr))
+    AccGenMean{T}(0, zero(T), T(pwr), T(1/pwr))
 end
                                         
 function (acc::AccGenMean{T})() where {T}
