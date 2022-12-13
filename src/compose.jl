@@ -423,7 +423,7 @@ end
 AccStats(::Type{T}=Float64) where {T} = AccStats(0, zero(T), zero(T), zero(T), zero(T))
 
 function (acc::AccStats{T})() where {T}
-    (count=count(acc), mean=mean(acc), var=var(acc), std=std(acc), skewness=skewness(acc), kurtosis=kurtosis(acc))
+    (nobs=nobs(acc), mean=mean(acc), var=var(acc), std=std(acc), skewness=skewness(acc), kurtosis=kurtosis(acc))
 end
 
 #=
