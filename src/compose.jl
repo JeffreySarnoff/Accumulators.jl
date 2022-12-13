@@ -445,10 +445,10 @@ function (acc::AccStats{T})(x) where {T}
     delta_n2 = delta_n^2
     term1 = delta * delta_n * n1
     acc.m1 += delta_n
-    acc.m4 += term1 * delta_n2 * (acc.n^2 - 3*acc.n + 3) + 
-              6 * delta_2 * acc.m2 - 
+    acc.m4 += term1 * delta_n2 * (acc.nobs^2 - 3*acc.nobs + 3) + 
+              6 * delta_n2 * acc.m2 - 
               4 * delta_n * acc.m3
-    acc.m3 += term1 * delta_n * (n - 2) - 3 * delta_n * acc.m2
+    acc.m3 += term1 * delta_n * (acc.nobs - 2) - 3 * delta_n * acc.m2
     acc.m2 += term1
 end
 
