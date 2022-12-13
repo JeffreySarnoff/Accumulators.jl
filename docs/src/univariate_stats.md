@@ -20,6 +20,14 @@ mean = acc()
 ```
 
 ```
+acc = AccGenMean(Float32, 2.0)     # Quadratic Mean
+for i in eachindex(data_sequence)
+    acc( data_sequence[i] )
+end
+mean = acc()
+```
+
+```
 acc = AccStats(Float32)
 for i in eachindex(data_sequence)
     acc( data_sequence[i] )
