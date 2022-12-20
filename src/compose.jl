@@ -301,7 +301,7 @@ function AccHarmMean(::Type{T}=AccNum) where {T}
 end
 
 function (acc::AccHarmMean{T})() where {T}
-    n = ifelse(acc.nobs === 0, 1, acc.nobs)
+    n = ifelse(iszero(acc.nobs), 1, acc.nobs)
     n / acc.invhmean
 end
 
