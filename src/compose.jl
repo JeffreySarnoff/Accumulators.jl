@@ -3,7 +3,7 @@
      AccMinimum, AccMaximum, AccExtrema, 
      AccSum, AccProd,
      AccMean, AccGeoMean, AccHarmMean, AccGenMean,
-     AccMeanVar, AccMeanStd, AccStats,
+     AccMeanAndVar, AccMeanAndStd, AccStats,
      AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd
 =#
 #=
@@ -346,22 +346,22 @@ end
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
 
-mutable struct AccMeanVar{T} <: Accumulator{T}
+mutable struct AccMeanAndVar{T} <: Accumulator{T}
     nobs::Int       # count each observation
     mean::T         # current mean
     svar::T         # sum of variances x[1:1=0,1:2,..,1:nobs]
 end
 
-function AccMeanVar(::Type{T}=Float64) where {T}
-    AccMeanVar{T}(0, zero(T), zero(T))
+function AccMeanAndVar(::Type{T}=Float64) where {T}
+    AccMeanAndVar{T}(0, zero(T), zero(T))
 end
 
-function (acc::AccMeanVar{T})() where {T}
+function (acc::AccMeanAndVar{T})() where {T}
     unbiased_var = acc.svar / (acc.nobs - 1)
     (mean=acc.mean, var=unbiased_var)
 end
 
-function (acc::AccMeanVar{T})(x::T) where {T}
+function (acc::AccMeanAndVar{T})(x::T) where {T}
     acc.nobs += 1
     prior_mean = acc.mean
     acc.mean = prior_mean + (x - prior_mean) / acc.nobs
@@ -369,7 +369,7 @@ function (acc::AccMeanVar{T})(x::T) where {T}
     acc
 end
 
-function (acc::AccMeanVar{T})(xs::Seq{T}) where {T}
+function (acc::AccMeanAndVar{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)
     prior_mean = acc.mean
     xmean = vmean(xs)
@@ -378,22 +378,22 @@ function (acc::AccMeanVar{T})(xs::Seq{T}) where {T}
     acc
 end
 
-mutable struct AccMeanStd{T} <: Accumulator{T}
+mutable struct AccMeanAndStd{T} <: Accumulator{T}
     nobs::Int       # count each observation
     mean::T         # current mean
     svar::T         # sum of variances x[1:1=0,1:2,..,1:nobs]
 end
 
-function AccMeanStd(::Type{T}=Float64) where {T}
-    AccMeanVar{T}(0, zero(T), zero(T))
+function AccMeanAndStd(::Type{T}=Float64) where {T}
+    AccMeanAndStd{T}(0, zero(T), zero(T))
 end
 
-function (acc::AccMeanStd{T})() where {T}
+function (acc::AccMeanAndStd{T})() where {T}
     unbiased_std = sqrt(acc.svar / (acc.nobs - 1))
     (mean=acc.mean, std=unbiased_std)
 end
 
-function (acc::AccMeanStd{T})(x::T) where {T}
+function (acc::AccMeanAndStd{T})(x::T) where {T}
     acc.nobs += 1
     prior_mean = acc.mean
     acc.mean = prior_mean + (x - prior_mean) / acc.nobs
@@ -401,7 +401,7 @@ function (acc::AccMeanStd{T})(x::T) where {T}
     acc
 end
 
-function (acc::AccMeanStd{T})(xs::Seq{T}) where {T}
+function (acc::AccMeanAndStd{T})(xs::Seq{T}) where {T}
     acc.nobs += length(xs)
     prior_mean = acc.mean
     xmean = vmean(xs)
