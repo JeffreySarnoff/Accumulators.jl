@@ -59,16 +59,16 @@ end
 @testset "stats" begin
     acc = AccMeanAndVar()
     accvals(acc, sortn8)
-    @test Tuple(acc()) ≐ mean_and_var(sortn8)
+    @test all(map(≐, Tuple(acc()), mean_and_var(sortn8))
 
     acc = AccMeanAndStd()
     accvals(acc, sortn8)
-    @test Tuple(acc()) ≐ mean_and_std(sortn8)
+    @test all(map(≐, Tuple(acc()), mean_and_std(sortn8))
 
     acc = AccStats()
     accvals(acc, sortn8)
     tst = (nobs = length(sortn8), mean = mean(sortn8), var = var(sortn8), std = std(sortn8), skewness = skewness(sortn8), kurtosis = kurtosis(sortn8)) 
-    @test acc() ≐ tst
+    @test all(map(≐, Tuple(acc()), Tuple(tst))
 end
 
 @testset "expwt" begin
