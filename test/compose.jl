@@ -15,11 +15,11 @@
    accvals(acc, one2five)
    @test acc() == 5
   
-   acc = AccMin()
+   acc = AccMinimum()
    accvals(acc, sortn8)
    @test acc() == sortn8[1]
   
-   acc = AccMax()
+   acc = AccMaximum()
    accvals(acc, sortn8)
    @test acc() == sortn8[end]
 
