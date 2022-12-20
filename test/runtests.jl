@@ -1,4 +1,5 @@
 using Accumulators, StatsBase, RandomNumbers, Test
+import RandomNumbers.Xorshifts.Xoshiro128StarStar as Xoshiro
 
 rng = Xoshiro(1618);
 ns = (4,16,63,255);
