@@ -43,7 +43,7 @@ end
     accvals(acc, sortn8)
     @test acc() ≐ mean(sortn8)
    
-    acc = AccGeomMean()
+    acc = AccGeoMean()
     accvals(acc, sortn8)
     @test acc() ≐ geomean(map(abs, sortn8))
 
