@@ -568,9 +568,12 @@ nminima(acc::AccExtrema) = acc.nmin
 nmaxima(acc::AccMinimum) = acc.nmax
 nmaxima(acc::AccExtrema) = acc.nmax
 
-StatsBase.mean(acc::AccMeanVar) = acc.mean
-StatsBase.var(acc::AccMeanVar) = acc.svar / (acc.nobs - 1)
-StatsBase.std(acc::AccMeanVar) = sqrt(acc.svar / (acc.nobs - 1))
+StatsBase.mean(acc::AccMeanAndVar) = acc.mean
+StatsBase.var(acc::AccMeanAndVar) = acc.svar / (acc.nobs - 1)
+StatsBase.std(acc::AccMeanAndVar) = sqrt(acc.svar / (acc.nobs - 1))
+StatsBase.mean(acc::AccMeanAndStd) = acc.mean
+StatsBase.var(acc::AccMeanAndStd) = acc.svar / (acc.nobs - 1)
+StatsBase.std(acc::AccMeanAndStd) = sqrt(acc.svar / (acc.nobs - 1))
 
 StatsBase.mean(acc::AccStats{T}) where {T} = T(acc.m1)
 StatsBase.var(acc::AccStats{T}) where {T} = T(acc.m2 / (acc.nobs - 1))
