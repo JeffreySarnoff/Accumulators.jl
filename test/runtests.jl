@@ -1,4 +1,4 @@
-using Accumulators, StatsBase, Random, Test
+using Accumulators, StatsBase, RandomNumbers, Test
 
 rng = Xoshiro(1618);
 ns = (4,16,63,255);
