@@ -51,7 +51,7 @@ end
     accvals(acc, sortn8)
     @test acc() ≐ harmmean(sortn8)
 
-    acc = AccGenMean(2)
+    acc = AccGenMean(power=2)
     accvals(acc, sortn8)
     @test acc() ≐ genmean(sortn8, 2)
 end
