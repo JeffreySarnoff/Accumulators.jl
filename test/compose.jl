@@ -1,3 +1,15 @@
+#=
+     AccCount, 
+     AccMinimum, AccMaximum, AccExtrema,
+
+     AccSum, AccProd,
+
+     AccMean, AccGeoMean, AccHarmMean, AccGenMean,
+
+     AccMeanVar, AccMeanStd, AccStats,
+     AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd
+=#
+
 @testset "simple accumulators" begin
    acc = AccCount()
    accvals(acc, one2five)
@@ -31,26 +43,34 @@ end
     accvals(acc, sortn8)
     @test acc() ≐ mean(sortn8)
    
-    acc = AccGeometricMean()
+    acc = AccGeomMean()
     accvals(acc, sortn8)
     @test acc() ≐ geomean(map(abs, sortn8))
 
-    acc = AccHarmonicMean()
+    acc = AccHarmMean()
     accvals(acc, sortn8)
     @test acc() ≐ harmmean(sortn8)
+
+    acc = AccGenMean(2)
+    accvals(acc, sortn8)
+    @test acc() ≐ genmean(sortn8, 2)
 end
    
 @testset "stats" begin
-   
+    acc = AccMeanAndVar()
+    accvals(acc, sortn8)
+    @test acc() ≐ mean_and_var(sortn8)
+
+    acc = AccMeanAndStd()
+    accvals(acc, sortn8)
+    @test acc() ≐ mean_and_std(sortn8)
+
+    acc = AccStats()
+    accvals(acc, sortn8)
+    #@test acc() ≐ mean(sortn8)
 end
 
 @testset "expwt" begin
+#     AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd   
 end
 
-#=
- AccMeanVar,
-    AccStats,
-    AccExpWtMean, AccExpWtMeanVar,
-    acc_count, acc_mean, acc_var, acc_std, acc_skew, acc_kurt,
-    acc_midrange,
-=#
