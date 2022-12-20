@@ -7,42 +7,11 @@ export Accumulator,
     AccSum, AccProd,
     AccMean, AccGeoMean, AccHarmMean, AccGenMean,
     AccMeanAndVar, AccMeanAndStd, AccStats,
-    AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd,
-#=
-    AccMinimumAbs, AccMaximumAbs, AccExtremaAbs,
-    AccSumAbs, AccProdAbs,
-
-    AccMeanAbs, AccGeoMeanAbs, AccHarmMeanAbs,
-    AccMeanVarMag, AccMeanStdMag, AccStatsMag,
-    
-    AccMagMinimum, AccMagMaximum, AccMagExtrema,
-    AccMagSum, AccMagProd,
-    AccAbsMinimum, AccMaximum, AccMagExtrema,
-    AccMagSum, AccMagProd,
-
-    AccMeanMag, AccGeoMeanMag, AccHarmMeanMag,
-    AccMeanVarMag, AccMeanStdMag, AccStatsMag,
-
-    AccExpWtMean, AccExpWtMeanVar,
-    AccMinAbs, AccMinAbs2, AccMaxAbs, AccMaxAbs2,
-    AccSumAbs, AccSumAbs2, AccProdAbs, AccProdAbs2, 
-    AccMeanAbs, AccMeanAbs2, AccMeanVarAbs, AccMeanVarAbs2,
-    # for paired data streams
-    AccCov, AccCor,
-    # Accum is Acc with a prespecified function applied to each new 'x'
-    AccumMin, AccumMax, AccumExtrema,
-    AccumSum, AccumProd,
-    AccumMean, AccumGeometricMean, AccumHarmonicMean,
-    AccumMeanVar,
-    AccumStats,
-    AccumExpWtMean, AccumExpWtMeanVar,
-=#
+    AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd
 
 using LoopVectorization: @turbo, @tturbo
 using VectorizedStatistics
 using Chain
-
-#
 
 accumulator_type = Float64
 if isdefined(Main, :AccumulatorNumType)
@@ -54,8 +23,6 @@ elseif haskey(ENV, "AccumulatorNumType")
     end
 end
 const AccNum = accumulator_type
-
-#
 
 abstract type Accumulator{T} <: Function end
 
@@ -72,6 +39,5 @@ include("compose.jl")
 include("compose2.jl")
 include("augment.jl")
 include("absvals.jl")
-
 
 end  # Accumulators
