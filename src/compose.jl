@@ -40,24 +40,24 @@ names used in StatsBase
 
 # Count
 
-mutable struct AccCount{T} <: Accumulator{T}
+mutable struct AccCount{I} <: Accumulator{I}
     nobs::Int       # count each observation
 end
 
-function AccCount(::Type{T}=Int64) where {T}
-     AccCount{T}(zero(T))
+function AccCount(::Type{I}=Int64) where {I}
+     AccCount{I}(zero(I))
 end
 
-function (acc::AccCount{T})() where {T}
+function (acc::AccCount{I})() where {I}
     acc.nobs
 end
      
-function (acc::AccCount{T})(x::T) where {T}
-    acc.nobs += one(T)
+function (acc::AccCount{I})(x::T) where {I,T}
+    acc.nobs += one(I)
     acc
 end
 
-function (acc::AccCount{T})(xs::Seq{T}) where {T}
+function (acc::AccCount{I})(xs::Seq{T}) where {I,T}
     acc.nobs += length(xs)
     acc
 end
