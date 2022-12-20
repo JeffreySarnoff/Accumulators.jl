@@ -18,7 +18,8 @@ julia = "1.8.3"
 
 [extras]
 StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
+RandomNumbers = "e6cf234a-135c-5ec9-84dd-332b85af5143"
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 
 [targets]
-test = ["StatsBase", "Test"]
+test = ["RandomNumbers", "StatsBase", "Test"]
