@@ -269,11 +269,11 @@ mutable struct AccGeoMean{T} <: Accumulator{T}
 end
 
 function AccGeoMean(::Type{T}=AccNum) where {T}
-     AccGeoMean{T}(0, one(T))
+     AccGeoMean{T}(0, zero(T))
 end
 
 function (acc::AccGeoMean{T})() where {T}
-    n = ifelse(acc.nobs === 0 ? 1 : acc.nobs)
+    n = ifelse(iszero(acc.nobs), 1, acc.nobs)
     exp(acc.sumlog / n)
 end
 
@@ -301,7 +301,7 @@ function AccHarmMean(::Type{T}=AccNum) where {T}
 end
 
 function (acc::AccHarmMean{T})() where {T}
-    n = ifelse(acc.nobs === 0 ? 1 : acc.nobs)
+    n = ifelse(acc.nobs === 0, 1, acc.nobs)
     n / acc.invhmean
 end
 
