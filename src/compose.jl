@@ -62,7 +62,7 @@ function (acc::AccCount{I})(xs::Seq{T}) where {I,T}
     acc
 end
 
-# Min
+# Minimum
 
 mutable struct AccMinimum{T} <: Accumulator{T}
     nobs::Int       # count each observation
@@ -97,7 +97,7 @@ function (acc::AccMinimum{T})(xs::Seq{T}) where {T}
     acc
 end
 
-# Max
+# Maximum
 
 mutable struct AccMaximum{T} <: Accumulator{T}
     nobs::Int       # count each observation
@@ -155,6 +155,10 @@ function (acc::AccExtrema{T})(x::T) where {T}
     if x < acc.min
         acc.nmin += 1
         acc.min = x
+    end
+    if x > acc.max
+        acc.nmax += 1
+        acc.max = x
     end
     acc
 end
