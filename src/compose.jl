@@ -326,7 +326,7 @@ mutable struct AccGenMean{T} <: Accumulator{T}
     const rpwr::T   # reciprocal of power
 end
 
-function AccGenMean(::Type{T}=AccNum, power::Real=2.0) where {T}
+function AccGenMean(::Type{T}=AccNum; power::Real=2.0) where {T}
     AccGenMean{T}(0, zero(T), T(power), T(1/power))
 end
                                         
