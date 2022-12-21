@@ -1,12 +1,4 @@
 #=
-     AccCount, 
-     AccMinimum, AccMaximum, AccExtrema, 
-     AccSum, AccProd,
-     AccMean, AccGeoMean, AccHarmMean, AccGenMean,
-     AccMeanAndVar, AccMeanAndStd, AccStats,
-     AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd
-=#
-#=
      AccumCount, 
      AccumMinimum, AccumMaximum, AccumExtrema, 
      AccumSum, AccumProd,
@@ -26,18 +18,18 @@ function AccumCount(::Type{I}=Int64) where {I,F}
      AccumCount{I,F}(zero(I))
 end
 
-function (Accum::AccumCount{I})() where {I}
-    Accum.nobs
+function (accum::AccumCount{I})() where {I}
+    accum.nobs
 end
      
-function (Accum::AccumCount{I})(x::T) where {I,T}
-    Accum.nobs += one(I)
-    Accum
+function (accum::AccumCount{I})(x::T) where {I,T}
+    accum.nobs += one(I)
+    accum
 end
 
-function (Accum::AccumCount{I})(xs::Seq{T}) where {I,T}
-    Accum.nobs += length(xs)
-    Accum
+function (accum::AccumCount{I})(xs::Seq{T}) where {I,T}
+    accum.nobs += length(xs)
+    accum
 end
 
 # Minimum
@@ -53,27 +45,29 @@ function AccumMinimum(::Type{T}=AccumNum; fn::F=identity) where {T,F}
      AccumMinimum{T,F}(0, 0, typemax(T), fn)
 end
 
-function (Accum::AccumMinimum{T,F})() where {T,F}
-    Accum.min
+function (accum::AccumMinimum{T,F})() where {T,F}
+    accum.min
 end
 
-function (Accum::AccumMinimum{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    if x < Accum.min
-        Accum.nmin += 1
-        Accum.min = x
+function (accum::AccumMinimum{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    if x < accum.min
+        accum.nmin += 1
+        accum.min = xx
     end
-    Accum
+    accum
 end
 
-function (Accum::AccumMinimum{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)     
-    x = vminimum(xs)
-    if x < Accum.min
-        Accum.nmin += 1
-        Accum.min = x
+function (accum::AccumMinimum{T,F})(xs::Seq{T}) where {T,F}
+    xxs = map(accum.fn, xs)
+    accum.nobs += length(xs)
+    x = vminimum(xxs)
+    if x < accum.min
+        accum.nmin += 1
+        accum.min = x
     end
-    Accum
+    accum
 end
 
 # Maximum
@@ -82,33 +76,35 @@ mutable struct AccumMaximum{T,F} <: AccumLensed{T,F}
     nobs::Int       # count each observation
     nmax::Int       # count distinct maxima
     max::T          # current maximum
+    fn::F
 end
 
 function AccumMaximum(::Type{T}=AccumNum; fn::F=identity) where {T,F}
      AccumMaximum{T,F}(0, 0, typemin(T), fn)
 end
 
-function (Accum::AccumMaximum{T})() where {T,F}
-    Accum.max
+function (accum::AccumMaximum{T,F})() where {T,F}
+    accum.max
 end
 
-function (Accum::AccumMaximum{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    if x > Accum.max
-        Accum.nmax += 1
-        Accum.max = x
+function (accum::AccumMaximum{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    if xx > accum.max
+        accum.nmax += 1
+        accum.max = xx
     end
-    Accum
+    accum
 end
 
-function (Accum::AccumMaximum{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)     
+function (accum::AccumMaximum{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)     
     x = vmaximum(xs)
-    if x > Accum.max
-        Accum.nmax += 1
-        Accum.max = x
+    if x > accum.max
+        accum.nmax += 1
+        accum.max = x
     end
-    Accum
+    accum
 end
 
 # Extrema
@@ -126,35 +122,36 @@ function AccumExtrema(::Type{T}=AccumNum; fn::F=identity) where {T,F}
      AccumExtrema{T,F}(0, 0, 0, typemax(T), typemin(T), fn)
 end
 
-function (Accum::AccumExtrema{T})() where {T,F}
-    (Accum.min, Accum.max)
+function (accum::AccumExtrema{T,F})() where {T,F}
+    (accum.min, accum.max)
 end
 
-function (Accum::AccumExtrema{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    if x < Accum.min
-        Accum.nmin += 1
-        Accum.min = x
+function (accum::AccumExtrema{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    if xx < accum.min
+        accum.nmin += 1
+        accum.min = xx
     end
-    if x > Accum.max
-        Accum.nmax += 1
-        Accum.max = x
+    if xx > accum.max
+        accum.nmax += 1
+        accum.max = xx
     end
-    Accum
+    accum
 end
 
-function (Accum::AccumExtrema{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)     
+function (accum::AccumExtrema{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)     
     mn, mx = vextrema(xs)
-    if mn < Accum.min
-        Accum.nmin += 1
-        Accum.min = mn
+    if mn < accum.min
+        accum.nmin += 1
+        accum.min = mn
     end
-    if mx > Accum.max
-        Accum.nmax += 1
-        Accum.max = mx
+    if mx > accum.max
+        accum.nmax += 1
+        accum.max = mx
     end
-    Accum
+    accum
 end
 
 # Sum
@@ -169,21 +166,22 @@ function AccumSum(::Type{T}=AccumNum; fn::F=identity) where {T,F}
      AccumSum{T,F}(0, zero(T), fn)
 end
 
-function (Accum::AccumSum{T})() where {T,F}
-    Accum.sum
+function (accum::AccumSum{T,F})() where {T,F}
+    accum.sum
 end
 
-function (Accum::AccumSum{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    Accum.sum += x
-    Accum
+function (accum::AccumSum{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    accum.sum += xx
+    accum
 end
 
-function (Accum::AccumSum{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)     
+function (accum::AccumSum{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)     
     x = vsum(xs)
-    Accum.sum += x
-    Accum
+    accum.sum += x
+    accum
 end
 
 # Prod
@@ -198,21 +196,22 @@ function AccumProd(::Type{T}=AccumNum; fn::F=identity) where {T,F}
      AccumProd{T,F}(0, one(T), fn)
 end
 
-function (Accum::AccumProd{T})() where {T,F}
-    Accum.prod
+function (accum::AccumProd{T,F})() where {T,F}
+    accum.prod
 end
 
-function (Accum::AccumProd{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    Accum.prod *= x
-    Accum
+function (accum::AccumProd{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    accum.prod *= xx
+    accum
 end
 
-function (Accum::AccumProd{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)     
+function (accum::AccumProd{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)     
     x = vprod(xs)
-    Accum.prod *= x
-    Accum
+    accum.prod *= x
+    accum
 end
 
 # Mean
@@ -227,21 +226,22 @@ function AccumMean(::Type{T}=AccumNum; fn::F=identity) where {T,F}
      AccumMean{T,F}(0, zero(T), fn)
 end
 
-function (Accum::AccumMean{T})() where {T,F}
-    Accum.mean
+function (accum::AccumMean{T,F})() where {T,F}
+    accum.mean
 end
 
-function (Accum::AccumMean{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    Accum.mean += (x - Accum.mean) / Accum.nobs
-    Accum
+function (accum::AccumMean{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    accum.mean += (xx - accum.mean) / accum.nobs
+    accum
 end
 
-function (Accum::AccumMean{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)     
+function (accum::AccumMean{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)     
     xmean = vmean(xs)
-    Accum.mean += (xmean - Accum.mean) / Accum.nobs
-    Accum
+    accum.mean += (xmean - accum.mean) / accum.nobs
+    accum
 end
 
 # GeoMean
@@ -256,25 +256,25 @@ function AccumGeoMean(::Type{T}=AccumNum; fn::F=identity) where {T,F}
      AccumGeoMean{T,F}(0, zero(T), fn)
 end
 
-function (Accum::AccumGeoMean{T})() where {T,F}
-    n = ifelse(iszero(Accum.nobs), 1, Accum.nobs)
-    exp(Accum.sumlog / n)
+function (accum::AccumGeoMean{T,F})() where {T,F}
+    n = ifelse(iszero(accum.nobs), 1, accum.nobs)
+    exp(accum.sumlog / n)
 end
 
-function (Accum::AccumGeoMean{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    Accum.sumlog += logabs(x::T)
-    Accum
+function (accum::AccumGeoMean{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    accum.sumlog += logabs(xx)
+    accum
 end
 
-function (Accum::AccumGeoMean{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)
-    Accum.sumlog += sum(map(logabs, xs))
-    Accum
+function (accum::AccumGeoMean{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)
+    accum.sumlog += sum(map(logabs, xs))
+    accum
 end
 
-# HarmMean
-                                   
+# Harmonic Mean
 mutable struct AccumHarmMean{T,F} <: AccumLensed{T,F}
     nobs::Int       # count each observation
     invhmean::T     # 1 / current harmonic mean
@@ -285,21 +285,22 @@ function AccumHarmMean(::Type{T}=AccumNum; fn::F=identity) where {T,F}
      AccumHarmMean{T,F}(0, zero(T), fn)
 end
 
-function (Accum::AccumHarmMean{T})() where {T,F}
-    n = ifelse(iszero(Accum.nobs), 1, Accum.nobs)
-    n / Accum.invhmean
+function (accum::AccumHarmMean{T,F})() where {T,F}
+    n = ifelse(iszero(accum.nobs), 1, accum.nobs)
+    n / accum.invhmean
 end
 
-function (Accum::AccumHarmMean{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    Accum.invhmean += one(T) / x
-    Accum
+function (accum::AccumHarmMean{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    accum.invhmean += one(T) / xx
+    accum
 end
 
-function (Accum::AccumHarmMean{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)
-    Accum.invhmean += sum(map(inv, xs))
-    Accum
+function (accum::AccumHarmMean{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)
+    accum.invhmean += sum(map(inv, xs))
+    accum
 end
 
 # Generalized Mean (defaults to Quadratic Mean [root-mean-squared])
@@ -316,21 +317,22 @@ function AccumGenMean(::Type{T}=AccumNum; ; fn::F=identity, power::Real=2.0) whe
     AccumGenMean{T,F}(0, zero(T), T(power), T(1/power), fn)
 end
                                         
-function (Accum::AccumGenMean{T})() where {T,F}
-    (Accum.gmean)^Accum.rpwr
+function (accum::AccumGenMean{T,F})() where {T,F}
+    (accum.gmean)^accum.rpwr
 end
 
-function (Accum::AccumGenMean{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    Accum.gmean += ((x^Accum.pwr) - Accum.gmean) / Accum.nobs
-    Accum
+function (accum::AccumGenMean{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    accum.gmean += ((xx^accum.pwr) - accum.gmean) / accum.nobs
+    accum
 end
 
-function (Accum::AccumGenMean{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)     
-    xmean = vmean(map(x->x^Accum.pwr, xs))
-    Accum.gmean += (xmean - Accum.gmean) / Accum.nobs
-    Accum
+function (accum::AccumGenMean{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)     
+    xmean = vmean(map(x->x^accum.pwr, xs))
+    accum.gmean += (xmean - accum.gmean) / accum.nobs
+    accum
 end
               
 # Unbiased Sample Variation (with Mean)
@@ -347,26 +349,27 @@ function AccumMeanAndVar(::Type{T}=Float64; fn::F=identity) where {T,F}
     AccumMeanAndVar{T,F}(0, zero(T), zero(T), fn)
 end
 
-function (Accum::AccumMeanAndVar{T})() where {T,F}
-    unbiased_var = Accum.svar / (Accum.nobs - 1)
-    (mean=Accum.mean, var=unbiased_var)
+function (accum::AccumMeanAndVar{T,F})() where {T,F}
+    unbiased_var = accum.svar / (accum.nobs - 1)
+    (mean=accum.mean, var=unbiased_var)
 end
 
-function (Accum::AccumMeanAndVar{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    prior_mean = Accum.mean
-    Accum.mean = prior_mean + (x - prior_mean) / Accum.nobs
-    Accum.svar = Accum.svar + (x - prior_mean) * (x - Accum.mean)
-    Accum
+function (accum::AccumMeanAndVar{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    prior_mean = accum.mean
+    accum.mean = prior_mean + (xx - prior_mean) / accum.nobs
+    accum.svar = accum.svar + (xx - prior_mean) * (xx - accum.mean)
+    accum
 end
 
-function (Accum::AccumMeanAndVar{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)
-    prior_mean = Accum.mean
+function (accum::AccumMeanAndVar{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)
+    prior_mean = accum.mean
     xmean = vmean(xs)
-    Accum.mean += (xmean - prior_mean) / Accum.nobs
-    Accum.svar = Accum.svar + (x - prior_mean) * (x - xmean)
-    Accum
+    accum.mean += (xmean - prior_mean) / accum.nobs
+    accum.svar = accum.svar + (x - prior_mean) * (x - xmean)
+    accum
 end
 
 mutable struct AccumMeanAndStd{T,F} <: AccumLensed{T,F}
@@ -380,26 +383,27 @@ function AccumMeanAndStd(::Type{T}=Float64; fn::F=identity) where {T,F}
     AccumMeanAndStd{T,F}(0, zero(T), zero(T), fn)
 end
 
-function (Accum::AccumMeanAndStd{T})() where {T,F}
-    unbiased_std = sqrt(Accum.svar / (Accum.nobs - 1))
-    (mean=Accum.mean, std=unbiased_std)
+function (accum::AccumMeanAndStd{T,F})() where {T,F}
+    unbiased_std = sqrt(accum.svar / (accum.nobs - 1))
+    (mean=accum.mean, std=unbiased_std)
 end
 
-function (Accum::AccumMeanAndStd{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    prior_mean = Accum.mean
-    Accum.mean = prior_mean + (x - prior_mean) / Accum.nobs
-    Accum.svar = Accum.svar + (x - prior_mean) * (x - Accum.mean)
-    Accum
+function (accum::AccumMeanAndStd{T,F})(x::T) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    prior_mean = accum.mean
+    accum.mean = prior_mean + (xx - prior_mean) / accum.nobs
+    accum.svar = accum.svar + (xx - prior_mean) * (x - accum.mean)
+    accum
 end
 
-function (Accum::AccumMeanAndStd{T})(xs::Seq{T}) where {T,F}
-    Accum.nobs += length(xs)
-    prior_mean = Accum.mean
+function (accum::AccumMeanAndStd{T,F})(xs::Seq{T}) where {T,F}
+    accum.nobs += length(xs)
+    prior_mean = accum.mean
     xmean = vmean(xs)
-    Accum.mean += (xmean - prior_mean) / Accum.nobs
-    Accum.svar = Accum.svar + (x - prior_mean) * (x - xmean)
-    Accum
+    accum.mean += (xmean - prior_mean) / accum.nobs
+    accum.svar = accum.svar + (x - prior_mean) * (x - xmean)
+    accum
 end
 
 # see https://www.johndcook.com/blog/skewness_kurtosis/
@@ -416,41 +420,42 @@ end
 AccumStats(::Type{T}=Float64; fn::F=identity) where {T,F} =
     AccumStats(0, zero(T), zero(T), zero(T), zero(T), fn)
 
-function (Accum::AccumStats{T})() where {T,F}
-    (nobs=nobs(Accum), mean=mean(Accum), var=var(Accum), std=std(Accum), skewness=skewness(Accum), kurtosis=kurtosis(Accum))
+function (accum::AccumStats{T,F})() where {T,F}
+    (nobs=nobs(accum), mean=mean(accum), var=var(accum), std=std(accum), skewness=skewness(accum), kurtosis=kurtosis(accum))
 end
 
 #=
                                                   
-function (Accum::AccumMeanVar{T})(x::T) where {T,F}
-    Accum.nobs += 1
-    prior_mean = Accum.mean
-    Accum.mean = prior_mean + (x - prior_mean) / Accum.nobs
-    Accum.svar = Accum.svar + (x - prior_mean) * (x - Accum.mean)
-    Accum
+function (accum::AccumMeanVar{T,F})(x::T) where {T,F}
+    accum.nobs += 1
+    prior_mean = accum.mean
+    accum.mean = prior_mean + (x - prior_mean) / accum.nobs
+    accum.svar = accum.svar + (x - prior_mean) * (x - accum.mean)
+    accum
 end
 =#
                                                   
-function (Accum::AccumStats{T})(x) where {T,F}
-    n1 = Accum.nobs
-    Accum.nobs += 1
-    delta = x - Accum.m1
-    delta_n = delta / Accum.nobs
+function (accum::AccumStats{T,F})(x) where {T,F}
+    xx = accum.fn(x)
+    n1 = accum.nobs
+    accum.nobs += 1
+    delta = xx - accum.m1
+    delta_n = delta / accum.nobs
     delta_n2 = delta_n^2
     term1 = delta * delta_n * n1
-    Accum.m1 += delta_n
-    Accum.m4 += term1 * delta_n2 * (Accum.nobs^2 - 3*Accum.nobs + 3) + 
-              6 * delta_n2 * Accum.m2 - 
-              4 * delta_n * Accum.m3
-    Accum.m3 += term1 * delta_n * (Accum.nobs - 2) - 3 * delta_n * Accum.m2
-    Accum.m2 += term1
+    accum.m1 += delta_n
+    accum.m4 += term1 * delta_n2 * (accum.nobs^2 - 3*accum.nobs + 3) + 
+              6 * delta_n2 * accum.m2 - 
+              4 * delta_n * accum.m3
+    accum.m3 += term1 * delta_n * (accum.nobs - 2) - 3 * delta_n * accum.m2
+    accum.m2 += term1
 end
 
-function (Accum::AccumStats{T})(xs::Seq{T}) where {T,F}
+function (accum::AccumStats{T,F})(xs::Seq{T}) where {T,F}
     for x in xs
         Accum(x)
     end
-    Accum
+    accum
 end
 
 #=
@@ -470,19 +475,20 @@ end
 AccumExpWtMean(::Type{T}=Float64; alpha::T=T(0.5); fn::F=identity) where {T,F} =
     AccumExpWtMean{T,F}(0, T(alpha), zero(T), fn)
 
-(Accum::AccumExpWtMean{T})() where {T,F} = Accum.expwtmean
+(accum::AccumExpWtMean{T,F})() where {T,F} = accum.expwtmean
 
-function (Accum::AccumExpWtMean{T})(x) where {T,F}
-    Accum.nobs += 1
-    Accum.expwtmean += Accum.alpha * (x - Accum.expwtmean)
-    Accum
+function (accum::AccumExpWtMean{T,F})(x) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    accum.expwtmean += accum.alpha * (xx - accum.expwtmean)
+    accum
 end
 
-function (Accum::AccumExpWtMean{T})(xs::Seq{T}) where {T,F}
+function (accum::AccumExpWtMean{T,F})(xs::Seq{T}) where {T,F}
     for x in xs
         Accum(x)
     end
-    Accum
+    accum
 end
 
 mutable struct AccumExpWtMeanVar{T,F} <: AccumLensed{T,F}
@@ -496,25 +502,26 @@ end
 AccumExpWtMeanVar(::Type{T}=Float64; alpha::T=T(0.5); fn::F=identity) where {T,F} =
     AccumExpWtMeanVar(0, alpha, zero(T), zero(T), fn)
 
-function(Accum::AccumExpWtMeanVar{T})() where {T,F}
-    unbiased_expwtvar = Accum.expwtsvar / (Accum.nobs - 1)
-    (expwt_mean=Accum.expwtmean, expwt_var=unbiased_expwtvar)
+function(accum::AccumExpWtMeanVar{T,F})() where {T,F}
+    unbiased_expwtvar = accum.expwtsvar / (accum.nobs - 1)
+    (expwt_mean=accum.expwtmean, expwt_var=unbiased_expwtvar)
 end
 
-function (Accum::AccumExpWtMeanVar{T})(x) where {T,F}
-    Accum.nobs += 1
-    diff = x - Accum.expwtmean
-    incr = Accum.alpha * diff
-    Accum.expwtmean += Accum.alpha * (x - Accum.expwtmean)
-    Accum.expwtsvar = (one(T) - Accum.alpha) * (Accum.expwtsvar + diff * incr)
-    Accum
+function (accum::AccumExpWtMeanVar{T,F})(x) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    diff = xx - accum.expwtmean
+    incr = accum.alpha * diff
+    accum.expwtmean += accum.alpha * (xx - accum.expwtmean)
+    accum.expwtsvar = (one(T) - accum.alpha) * (accum.expwtsvar + diff * incr)
+    accum
 end
 
-function (Accum::AccumExpWtMeanVar{T})(xs::Seq{T}) where {T,F}
+function (accum::AccumExpWtMeanVar{T,F})(xs::Seq{T}) where {T,F}
     for x in xs
-        Accum(x)
+        accum(x)
     end
-    Accum
+    accum
 end
 
 mutable struct AccumExpWtMeanStd{T,F} <: AccumLensed{T,F}
@@ -528,57 +535,60 @@ end
 AccumExpWtMeanStd(::Type{T}=Float64; alpha::T=T(0.5); fn::F=identity) where {T,F} =
     AccumExpWtMeanStd(0, alpha, zero(T), zero(T), fn)
 
-function(Accum::AccumExpWtMeanStd{T})() where {T,F}
-    unbiased_expwtstd = sqrt(Accum.expwtsvar / (Accum.nobs - 1))
-    (expwt_mean=Accum.expwtmean, expwt_std=unbiased_expwtstd)
+function(accum::AccumExpWtMeanStd{T,F})() where {T,F}
+    unbiased_expwtstd = sqrt(accum.expwtsvar / (accum.nobs - 1))
+    (expwt_mean=accum.expwtmean, expwt_std=unbiased_expwtstd)
 end
 
-function (Accum::AccumExpWtMeanStd{T})(x) where {T,F}
-    Accum.nobs += 1
-    diff = x - Accum.expwtmean
-    incr = Accum.alpha * diff
-    Accum.expwtmean += Accum.alpha * (x - Accum.expwtmean)
-    Accum.expwtsvar = (one(T) - Accum.alpha) * (Accum.expwtsvar + diff * incr)
-    Accum
+function (accum::AccumExpWtMeanStd{T,F})(x) where {T,F}
+    xx = accum.fn(x)
+    accum.nobs += 1
+    diff = xx - accum.expwtmean
+    incr = accum.alpha * diff
+    accum.expwtmean += accum.alpha * (xx - accum.expwtmean)
+    accum.expwtsvar = (one(T) - accum.alpha) * (accum.expwtsvar + diff * incr)
+    accum
 end
 
-function (Accum::AccumExpWtMeanStd{T})(xs::Seq{T}) where {T,F}
+function (accum::AccumExpWtMeanStd{T,F})(xs::Seq{T}) where {T,F}
     for x in xs
         Accum(x)
     end
-    Accum
+    accum
 end
 
-Base.length(@nospecialize Accum::Accumulator) = Accum.nobs
-StatsBase.nobs(@nospecialize Accum::Accumulator) = Accum.nobs
+Base.length(@nospecialize Accum::Accumulator) = accum.nobs
+StatsBase.nobs(@nospecialize Accum::Accumulator) = accum.nobs
 
 for (F,A) in ((:(Base.minimum), :AccumMinimum), (:(Base.maximum), :AccumMaximum), (:(Base.extrema), :AccumExtrema),
               (:(Base.sum), :AccumSum), (:(Base.prod), :AccumProd),
               (:(StatsBase.mean), :AccumMean), (:(StatsBase.geomean), :AccumGeoMean), (:(StatsBase.harmmean), :AccumHarmMean))
-     @eval $F(Accum::$A) = Accum()
+     @eval $F(accum::$A) = Accum()
 end
 
-Base.minimum(Accum::AccumExtrema) = Accum.min
-Base.maximum(Accum::AccumExtrema) = Accum.max
-midrange(Accum::AccumExtrema) = (Accum.min / 2) + (Accum.max / 2)
-proportionalrange(Accum::AccumExtrema, proportion) = (Accum.min * proportion) + (Accum.max * (1 - proportion))
+Base.minimum(accum::AccumExtrema) = accum.min
+Base.maximum(accum::AccumExtrema) = accum.max
+midrange(accum::AccumExtrema) = (accum.min / 2) + (accum.max / 2)
+proportionalrange(accum::AccumExtrema, proportion) = (accum.min * proportion) + (accum.max * (1 - proportion))
 
-nminima(Accum::AccumMinimum) = Accum.nmin
-nminima(Accum::AccumExtrema) = Accum.nmin
-nmaxima(Accum::AccumMinimum) = Accum.nmax
-nmaxima(Accum::AccumExtrema) = Accum.nmax
+nminima(accum::AccumMinimum) = accum.nmin
+nminima(accum::AccumExtrema) = accum.nmin
+nmaxima(accum::AccumMinimum) = accum.nmax
+nmaxima(accum::AccumExtrema) = accum.nmax
 
-StatsBase.mean(Accum::AccumMeanAndVar) = Accum.mean
-StatsBase.var(Accum::AccumMeanAndVar) = Accum.svar / (Accum.nobs - 1)
-StatsBase.std(Accum::AccumMeanAndVar) = sqrt(Accum.svar / (Accum.nobs - 1))
-StatsBase.mean(Accum::AccumMeanAndStd) = Accum.mean
-StatsBase.var(Accum::AccumMeanAndStd) = Accum.svar / (Accum.nobs - 1)
-StatsBase.std(Accum::AccumMeanAndStd) = sqrt(Accum.svar / (Accum.nobs - 1))
+StatsBase.mean(accum::AccumMeanAndVar) = accum.mean
+StatsBase.var(accum::AccumMeanAndVar) = accum.svar / (accum.nobs - 1)
+StatsBase.std(accum::AccumMeanAndVar) = sqrt(accum.svar / (accum.nobs - 1))
+StatsBase.mean(accum::AccumMeanAndStd) = accum.mean
+StatsBase.var(accum::AccumMeanAndStd) = accum.svar / (accum.nobs - 1)
+StatsBase.std(accum::AccumMeanAndStd) = sqrt(accum.svar / (accum.nobs - 1))
 
-StatsBase.mean(Accum::AccumStats{T}) where {T,F} = T(Accum.m1)
-StatsBase.var(Accum::AccumStats{T}) where {T,F} = T(Accum.m2 / (Accum.nobs - 1))
-StatsBase.std(Accum::AccumStats{T}) where {T,F} = T(sqrt(var(Accum)))
-StatsBase.skewness(Accum::AccumStats{T}) where {T,F} = T(sqrt(Accum.nobs) * Accum.m3 / (Accum.m2 * sqrt(Accum.m2)))
-StatsBase.kurtosis(Accum::AccumStats{T}) where {T,F} = T( ((Accum.nobs * Accum.m4) / (Accum.m2^2)) - 3)
+StatsBase.mean(accum::AccumStats{T}) where {T,F} = T(accum.m1)
+StatsBase.var(accum::AccumStats{T}) where {T,F} = T(accum.m2 / (accum.nobs - 1))
+StatsBase.std(accum::AccumStats{T}) where {T,F} = T(sqrt(var(accum)))
+StatsBase.skewness(accum::AccumStats{T}) where {T,F} = T(sqrt(accum.nobs) * accum.m3 / (accum.m2 * sqrt(accum.m2)))
+StatsBase.kurtosis(accum::AccumStats{T}) where {T,F} = T( ((accum.nobs * accum.m4) / (accum.m2^2)) - 3)
+
+
 
 
