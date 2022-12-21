@@ -98,8 +98,9 @@ function (accum::AccumMaximum{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumMaximum{T,F})(xs::Seq{T}) where {T,F}
-    accum.nobs += length(xs)     
-    x = vmaximum(xs)
+    xxs = map(accum.fn, xs)
+    accum.nobs += length(xs)
+    x = vmaximum(xxs)
     if x > accum.max
         accum.nmax += 1
         accum.max = x
@@ -141,8 +142,9 @@ function (accum::AccumExtrema{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumExtrema{T,F})(xs::Seq{T}) where {T,F}
+    xxs = map(accum.fn, xs)
     accum.nobs += length(xs)     
-    mn, mx = vextrema(xs)
+    mn, mx = vextrema(xxs)
     if mn < accum.min
         accum.nmin += 1
         accum.min = mn
@@ -178,8 +180,9 @@ function (accum::AccumSum{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumSum{T,F})(xs::Seq{T}) where {T,F}
-    accum.nobs += length(xs)     
-    x = vsum(xs)
+    xxs = map(accum.fn, xs)
+    accum.nobs += length(xs)
+    x = vsum(xxs)
     accum.sum += x
     accum
 end
@@ -208,8 +211,9 @@ function (accum::AccumProd{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumProd{T,F})(xs::Seq{T}) where {T,F}
-    accum.nobs += length(xs)     
-    x = vprod(xs)
+    xxs = map(accum.fn, xs)
+    accum.nobs += length(xs)
+    x = vprod(xxs)
     accum.prod *= x
     accum
 end
@@ -238,8 +242,9 @@ function (accum::AccumMean{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumMean{T,F})(xs::Seq{T}) where {T,F}
-    accum.nobs += length(xs)     
-    xmean = vmean(xs)
+    xxs = map(accum.fn, xs)
+    accum.nobs += length(xs)
+    xmean = vmean(xxs)
     accum.mean += (xmean - accum.mean) / accum.nobs
     accum
 end
@@ -269,8 +274,9 @@ function (accum::AccumGeoMean{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumGeoMean{T,F})(xs::Seq{T}) where {T,F}
+    xxs = map(accum.fn, xs)
     accum.nobs += length(xs)
-    accum.sumlog += sum(map(logabs, xs))
+    accum.sumlog += sum(map(logabs, xxs))
     accum
 end
 
@@ -298,8 +304,9 @@ function (accum::AccumHarmMean{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumHarmMean{T,F})(xs::Seq{T}) where {T,F}
+    xxs = map(accum.fn, xs)
     accum.nobs += length(xs)
-    accum.invhmean += sum(map(inv, xs))
+    accum.invhmean += sum(map(inv, xxs))
     accum
 end
 
@@ -316,7 +323,7 @@ end
 function AccumGenMean(::Type{T}=AccumNum; ; fn::F=identity, power::Real=2.0) where {T,F}
     AccumGenMean{T,F}(0, zero(T), T(power), T(1/power), fn)
 end
-                                        
+
 function (accum::AccumGenMean{T,F})() where {T,F}
     (accum.gmean)^accum.rpwr
 end
@@ -329,12 +336,13 @@ function (accum::AccumGenMean{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumGenMean{T,F})(xs::Seq{T}) where {T,F}
+    xxs = map(accum.fn, xs)
     accum.nobs += length(xs)     
-    xmean = vmean(map(x->x^accum.pwr, xs))
+    xmean = vmean(map(x->x^accum.pwr, xxs))
     accum.gmean += (xmean - accum.gmean) / accum.nobs
     accum
 end
-              
+
 # Unbiased Sample Variation (with Mean)
 # see https://www.johndcook.com/blog/standard_deviation/
 
@@ -364,11 +372,12 @@ function (accum::AccumMeanAndVar{T,F})(x::T) where {T,F}
 end
 
 function (accum::AccumMeanAndVar{T,F})(xs::Seq{T}) where {T,F}
+    xxs = map(accum.fn, xs)
     accum.nobs += length(xs)
     prior_mean = accum.mean
-    xmean = vmean(xs)
+    xmean = vmean(xxs)
     accum.mean += (xmean - prior_mean) / accum.nobs
-    accum.svar = accum.svar + (x - prior_mean) * (x - xmean)
+    accum.svar = accum.svar + (xmean - prior_mean) * (xmean - accum.mean)
     accum
 end
 
@@ -393,16 +402,17 @@ function (accum::AccumMeanAndStd{T,F})(x::T) where {T,F}
     accum.nobs += 1
     prior_mean = accum.mean
     accum.mean = prior_mean + (xx - prior_mean) / accum.nobs
-    accum.svar = accum.svar + (xx - prior_mean) * (x - accum.mean)
+    accum.svar = accum.svar + (xx - prior_mean) * (xx - accum.mean)
     accum
 end
 
 function (accum::AccumMeanAndStd{T,F})(xs::Seq{T}) where {T,F}
+    xxs = map(accum.fn, xs)
     accum.nobs += length(xs)
     prior_mean = accum.mean
-    xmean = vmean(xs)
+    xmean = vmean(xxs)
     accum.mean += (xmean - prior_mean) / accum.nobs
-    accum.svar = accum.svar + (x - prior_mean) * (x - xmean)
+    accum.svar = accum.svar + (xmean - prior_mean) * (accum.mean - xmean)
     accum
 end
 
@@ -424,17 +434,6 @@ function (accum::AccumStats{T,F})() where {T,F}
     (nobs=nobs(accum), mean=mean(accum), var=var(accum), std=std(accum), skewness=skewness(accum), kurtosis=kurtosis(accum))
 end
 
-#=
-                                                  
-function (accum::AccumMeanVar{T,F})(x::T) where {T,F}
-    accum.nobs += 1
-    prior_mean = accum.mean
-    accum.mean = prior_mean + (x - prior_mean) / accum.nobs
-    accum.svar = accum.svar + (x - prior_mean) * (x - accum.mean)
-    accum
-end
-=#
-                                                  
 function (accum::AccumStats{T,F})(x) where {T,F}
     xx = accum.fn(x)
     n1 = accum.nobs
@@ -452,8 +451,8 @@ function (accum::AccumStats{T,F})(x) where {T,F}
 end
 
 function (accum::AccumStats{T,F})(xs::Seq{T}) where {T,F}
-    for x in xs
-        Accum(x)
+    for i in eachindex(xs)
+        accum(xs[i])
     end
     accum
 end
@@ -485,8 +484,8 @@ function (accum::AccumExpWtMean{T,F})(x) where {T,F}
 end
 
 function (accum::AccumExpWtMean{T,F})(xs::Seq{T}) where {T,F}
-    for x in xs
-        Accum(x)
+    for x in eachindex(xs)
+        accum(xs[i])
     end
     accum
 end
@@ -518,8 +517,8 @@ function (accum::AccumExpWtMeanVar{T,F})(x) where {T,F}
 end
 
 function (accum::AccumExpWtMeanVar{T,F})(xs::Seq{T}) where {T,F}
-    for x in xs
-        accum(x)
+    for i in eachindex(xs)
+        accum(xs[i])
     end
     accum
 end
@@ -551,8 +550,8 @@ function (accum::AccumExpWtMeanStd{T,F})(x) where {T,F}
 end
 
 function (accum::AccumExpWtMeanStd{T,F})(xs::Seq{T}) where {T,F}
-    for x in xs
-        Accum(x)
+    for i in eachindex(xs)
+        accum(xs[i])
     end
     accum
 end
@@ -588,7 +587,6 @@ StatsBase.var(accum::AccumStats{T}) where {T,F} = T(accum.m2 / (accum.nobs - 1))
 StatsBase.std(accum::AccumStats{T}) where {T,F} = T(sqrt(var(accum)))
 StatsBase.skewness(accum::AccumStats{T}) where {T,F} = T(sqrt(accum.nobs) * accum.m3 / (accum.m2 * sqrt(accum.m2)))
 StatsBase.kurtosis(accum::AccumStats{T}) where {T,F} = T( ((accum.nobs * accum.m4) / (accum.m2^2)) - 3)
-
 
 
 
