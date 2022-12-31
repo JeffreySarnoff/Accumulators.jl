@@ -9,11 +9,6 @@ export Accumulator,
     AccMeanAndVar, AccMeanAndStd, AccStats,
     AccExpWtMean, AccExpWtMeanVar, AccExpWtMeanStd
 
-using StatsBase
-using LoopVectorization: @turbo, @tturbo
-using VectorizedStatistics
-using Chain
-
 accumulator_type = Float64
 if isdefined(Main, :AccumulatorNumType)
     accumulator_type = AccumulatorNumType
