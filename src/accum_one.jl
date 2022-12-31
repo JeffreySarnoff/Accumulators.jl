@@ -589,4 +589,3 @@ StatsBase.skewness(accum::AccStats{T}) where {T,F} = T(sqrt(acc.nobs) * acc.m3 /
 StatsBase.kurtosis(accum::AccStats{T}) where {T,F} = T( ((acc.nobs * acc.m4) / (acc.m2^2)) - 3)
 
 
-
