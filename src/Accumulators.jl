@@ -1,7 +1,7 @@
 module Accumulators
 
 export Seq, seq,
-    Accumulator,  
+    Accumulator, AccumCacher,
     # Acc_ is a typed accumlator
     AccCount,
     AccMinimum, AccMaximum, AccExtrema,
