@@ -66,6 +66,128 @@ end
     fill_length(t::Tuple, val, Val{_N}())
 end
 
+
+# type stable fill from start and into end
+
+fill_upto_length(t::NTuple{N,Any}, val, ::Val{N}, ::Val{B}, ::Val{E}) where {N,B,E} = t
+fill_upto_length(t::Tuple{}, val, ::Val{1}, ::Val{B}, ::Val{E}) where {B,E} = (val,)
+fill_upto_length(t::Tuple{Any}, val, ::Val{2}, ::Val{B}, ::Val{E}) where {B,E} = (val, t...)
+fill_upto_length(t::Tuple{}, val, ::Val{2}, ::Val{B}, ::Val{E}) where {B,E} = (val, val)
+
+@inline function fill_upto_length(t::Tuple, val, ::Val{_N}, ::Val{_B}, ::Val{_E} ) where {_N,_B,_E}
+    M = length(t)
+    N = _N::Int
+    B = _B::Int
+    E = _E::Int
+    M > N && throw(ArgumentError("input tuple of length $M, requested $N"))
+    (N - M) != (B + E) && 
+        throw(ArgumentError("padding of (N-M, $(N-M)) != (B+E, $(B+E))"))
+    if @generated
+        quote
+            #($(fill(:val, (B::Int) - length(t.parameters))...), t..., $(fill(:val, (E::Int) - length(t.parameters))...))
+            ($(fill(:val, (B::Int) )...), t..., $(fill(:val, (E::Int))...))
+        end
+    else
+        (fill(val, B)..., t...,  fill(val, E)...)
+    end
+end
+
+@inline function fill_upto_length(t::Tuple, val, _N::Integer, _B::Integer, _E::Integer)
+    fill_upto_length(t::Tuple, val, Val{_N}(), Val{_B}(), Val{_E}())
+end
+
+
+# type stable fill1 from start and fill2 into end
+
+fill_upto_length(t::NTuple{N,Any}, valb, vale, ::Val{N}, ::Val{B}, ::Val{E}) where {N,B,E} = t
+fill_upto_length(t::Tuple{}, valb, vale, ::Val{1}, ::Val{B}, ::Val{E}) where {B,E} = (val,)
+fill_upto_length(t::Tuple{Any}, valb, vale, ::Val{2}, ::Val{B}, ::Val{E}) where {B,E} = (val, t...)
+fill_upto_length(t::Tuple{}, valb, vale, ::Val{2}, ::Val{B}, ::Val{E}) where {B,E} = (val, val)
+
+@inline function fill_upto_length(t::Tuple, valb, vale, ::Val{_N}, ::Val{_B}, ::Val{_E} ) where {_N,_B,_E}
+    M = length(t)
+    N = _N::Int
+    B = _B::Int
+    E = _E::Int
+    M > N && throw(ArgumentError("input tuple of length $M, requested $N"))
+    (N - M) != (B + E) && 
+        throw(ArgumentError("padding of (N-M, $(N-M)) != (B+E, $(B+E))"))
+    if @generated
+        quote
+            #($(fill(:val, (B::Int) - length(t.parameters))...), t..., $(fill(:val, (E::Int) - length(t.parameters))...))
+            ($(fill(:valb, (B::Int) )...), t..., $(fill(:vale, (E::Int))...))
+        end
+    else
+        (fill(valb, B)..., t...,  fill(vale, E)...)
+    end
+end
+
+@inline function fill_upto_length(t::Tuple, valb, vale, _N::Integer, _B::Integer, _E::Integer)
+    fill_upto_length(t::Tuple, valb, vale, Val{_N}(), Val{_B}(), Val{_E}())
+end
+
+
+
+
+# type-stable padding from start
+fill_length(t::NTuple{N,Any}, val, ::Val{N}) where {N} = t
+fill_length(t::Tuple{}, val, ::Val{1}) = (val,)
+fill_length(t::Tuple{Any}, val, ::Val{2}) = (val, t...)
+fill_length(t::Tuple{}, val, ::Val{2}) = (val, val)
+
+@inline function fill_length(t::Tuple, val, ::Val{_N}) where {_N}
+    M = length(t)
+    N = _N::Int
+    M > N && throw(ArgumentError("input tuple of length $M, requested $N"))
+    if @generated
+        quote
+            ($(fill(:val, (_N::Int) - length(t.parameters))...), t...)
+        end
+    else
+        (fill(val, N - M)..., t...)
+    end
+end
+
+@inline function fill_length(t::Tuple, val, _N::Integer)
+    fill_length(t::Tuple, val, Val{_N}())
+end
+
+
+# type-stable padding at end
+fill_tolength(t::NTuple{N,Any}, val, ::Val{N}) where {N} = t
+fill_tolength(t::Tuple{}, val, ::Val{1}) = (val,)
+fill_tolength(t::Tuple{Any}, val, ::Val{2}) = (t..., val)
+fill_tolength(t::Tuple{}, val, ::Val{2}) = (val, val)
+#function fill_to_length(t::Tuple, val, ::Val{N}) where {N}
+#    @inline
+#    return (t..., ntuple(i -> val, N - length(t))...)
+#end
+
+@inline function fill_tolength(t::Tuple, val, ::Val{_N}) where {_N}
+    M = length(t)
+    N = _N::Int
+    M > N && throw(ArgumentError("input tuple of length $M, requested $N"))
+    if @generated
+        quote
+            (t..., $(fill(:val, (_N::Int) - length(t.parameters))...))
+        end
+    else
+        (t..., fill(val, N - M)...)
+    end
+end
+
+@inline function fill_tolength(t::Tuple, val, _N::Integer)
+    fill_tolength(t::Tuple, val, Val{_N}())
+end
+
+
+
+
+
+
+
+
+
 # constructing from an iterator
 
 # only define these in Base, to avoid overwriting the constructors
