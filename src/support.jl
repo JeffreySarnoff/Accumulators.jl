@@ -117,28 +117,25 @@ end
 
 
 @inline function rightshift1(x::NTuple{N,T}, newvalue::T) where {N,T}
-    return _rightshift1(newvalue, x[2:N])
+    _rightshift1(newvalue, x[2:N])
+end
+@inline function rightshift1(newvalue::T, x::NTuple{N,T}) where {N,T}
+    _rightshift1(newvalue, x[2:N])
 end
 
-@inline function _rightshift1(hewvalue::T, xs::Vararg{T,N}) where {N,T}
+@inline function _rightshift1(newvalue::T, xs::Vararg{T,N}) where {N,T}
+    _rightshift(newvalue, xs[2:end])
+end    
 
 @inline function _rightshift1(xs::Vararg{T,N}) where {N,T}
-    return (xs[(head >> nbits) | carry, _rightshift_carry(nbits, (head & ((one(UInt64) << nbits) - 1)) << (64 - nbits), tail...)...)
+    _rightshift1(xs[1]. xs[2:end])
+   # return (xs[(head >> nbits) | carry, _rightshift_carry(nbits, (head & ((one(UInt64) << nbits) - 1)) << (64 - nbits), tail...)...)
 end
 
 @inline _rightshift1(carry::T) where {T} = ()
 
 
 #=
-These methods are micro-optimised (or should be!!!) 
-for shifting the bits in an NTuple of unsigned integers, 
-carrying the bits "shifted off" one word over to the next word.
-The carry can also be "seeded" so as other methods like
-pushfirst and pushlast can be efficiently implemented without
-duplication of code or less efficient implementations
-that first shift and then insert an element.
-
-
 rightshift_carry & leftshift_carry
 
 These methods are micro-optimised (or should be!!!) for shifting the bits in 
@@ -148,6 +145,7 @@ pushfirst and pushlast can be efficiently implemented without duplication of cod
 or less efficient implementations that first shift and then insert an element.
 =#
 
+#=
 @inline function rightshift_carry(x::NTuple{N,UInt64}, nbits::Integer, prevcarry=zero(UInt64)) where {N}
     return _rightshift_carry(nbits, prevcarry, x...)
 end
@@ -169,7 +167,7 @@ end
 end
 
 @inline _leftshift_carry(nbits::Integer, prevcarry::UInt64) = prevcarry, ()
-
+=#
 
 # math functions for internal use
 
