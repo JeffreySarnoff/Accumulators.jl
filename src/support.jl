@@ -72,7 +72,6 @@ https://github.com/BioJulia/Kmers.jl/blob/master/src/tuple_bitflipping.jl
 rightshift & leftshift
 
 
-
 These methods are micro-optimised for use with an NTuple{N,T}.
 - shift out the oldest observed value, drops the [first, last]
 - shift or rewrite the youngest..penultimate_oldest values
