@@ -61,11 +61,7 @@ const AccumNum = Float64
 
 include("support.jl")
 
-include("accum_one.jl")
-
-include("accum_two.jl")
-include("accum_three.jl")
-include("accum_many.jl")
+include("accumulators.jl")
 
 #= ---- notes ---- =#
 
