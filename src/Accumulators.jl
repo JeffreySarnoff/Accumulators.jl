@@ -52,9 +52,8 @@ seq
 seq(x::AbstractArray{T,N}) where {N,T} = x
 seq(x::NTuple{N,T}) where {N,T} = x
 
-const AccumFloat = Float64
-const AccumNum   = Float64
 const AccNum = Float64
+const AccumNum = Float64
 
 #= ---- code organization ---- =#
 
