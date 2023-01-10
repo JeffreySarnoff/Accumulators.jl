@@ -1,4 +1,4 @@
-const AccNum = F
+const AccNum = Float64
 
 # shift new obs into tuple, drop oldest obs
 #=
