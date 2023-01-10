@@ -556,12 +556,12 @@ function (acc::AccExpWtMeanStd{T,F})(xs::Seq{T}) where {T,F}
     accum
 end
 
-Base.length(@nospecialize Accum::Accumulator) = acc.nobs
-StatsBase.nobs(@nospecialize Accum::Accumulator) = acc.nobs
+Base.length(@nospecialize acc::Accumulator) = acc.nobs
+StatsBase.nobs(@nospecialize acc::Accumulator) = acc.nobs
 
-for (F,A) in ((:(Base.minimum), :AccumMinimum), (:(Base.maximum), :AccumMaximum), (:(Base.extrema), :AccumExtrema),
-              (:(Base.sum), :AccumSum), (:(Base.prod), :AccumProd),
-              (:(StatsBase.mean), :AccumMean), (:(StatsBase.geomean), :AccumGeoMean), (:(StatsBase.harmmean), :AccumHarmMean))
+for (F,A) in ((:(Base.minimum), :AccMinimum), (:(Base.maximum), :AccMaximum), (:(Base.extrema), :AccExtrema),
+              (:(Base.sum), :AccSum), (:(Base.prod), :AccProd),
+              (:(StatsBase.mean), :AccMean), (:(StatsBase.geomean), :AccGeoMean), (:(StatsBase.harmmean), :AccHarmMean))
      @eval $F(accum::$A) = Accum()
 end
 
