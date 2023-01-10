@@ -320,7 +320,7 @@ mutable struct AccGenMean{T,F} <: Accumulator{T,F}
     fn::F
 end
 
-function AccGenMean(::Type{T}=AccumNum; ; fn::F=identity, power::Real=2.0) where {T,F}
+function AccGenMean(::Type{T}=AccumNum; fn::F=identity, power::Real=2.0) where {T,F}
     AccGenMean{T,F}(0, zero(T), T(power), T(1/power), fn)
 end
 
