@@ -117,7 +117,7 @@ end
 
 
 @inline function rightshift1(x::NTuple{N,T}, newvalue::T) where {N,T}
-    return _rightshift1(newvalue, @view(x,2,N))
+    return _rightshift1(newvalue, x[2:N])
 end
 
 @inline function _rightshift1(hewvalue::T, xs::Vararg{T,N}) where {N,T}
