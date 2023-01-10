@@ -114,26 +114,63 @@ end
     (x..., newvalue)
 end
 
+#=
+   rightshift1(    (1, 2, 3, 4))
+                   (4, 1, 2, 3)
 
+rightshift1(    (1, 2, 3, 4), 0)
+   rightshift1( 0, (1, 2, 3, 4))
+                   (1, 1, 2, 3)
+                   (0, 1, 2, 3)
+=#
 
-@inline function rightshift1(x::NTuple{N,T}, newvalue::T) where {N,T}
+@inline function _rightshift1(xs::Vararg{T,N}) where {N,T}
+    _rightshift1(xs[1], xs[2:end])
+end
+
+@inline function _rightshift1(x::NTuple{N,T}, newvalue::T) where {N,T}
     _rightshift1(newvalue, x[2:N])
 end
-@inline function rightshift1(newvalue::T, x::NTuple{N,T}) where {N,T}
-    _rightshift1(newvalue, x[2:N])
+@inline function _rightshift1(newvalue::T, x::NTuple{N,T}) where {N,T}
+    (newvalue, x[2:end]...)
 end
 
 @inline function _rightshift1(newvalue::T, xs::Vararg{T,N}) where {N,T}
-    _rightshift(newvalue, xs[2:end])
+    (newvalue, xs[2:end]...)
 end    
 
-@inline function _rightshift1(xs::Vararg{T,N}) where {N,T}
-    _rightshift1(xs[1]. xs[2:end])
+
+#=
+   leftshift1( 5, (1, 2, 3, 4))
+   leftshift1(    (1, 2, 3, 4), 5)
+                   (2, 3, 4, 4)
+                   (2, 3, 4, 5)
+=#
+
+# leftshift1
+
+@inline function _leftshift1(xs::Vararg{T,N}) where {N,T}
+    _leftshift1(xs[1], xs[2:end])
    # return (xs[(head >> nbits) | carry, _rightshift_carry(nbits, (head & ((one(UInt64) << nbits) - 1)) << (64 - nbits), tail...)...)
 end
 
-@inline _rightshift1(carry::T) where {T} = ()
+@inline function leftshift1(x::NTuple{N,T}, newvalue::T) where {N,T}
+    _leftshift1(newvalue, x[2:N])
+end
+@inline function leftshift1(newvalue::T, x::NTuple{N,T}) where {N,T}
+    _leftshift1(newvalue, x[2:N])
+end
 
+@inline function _leftshift1(newvalue::T, xs::Vararg{T,N}) where {N,T}
+    _leftshift(newvalue, xs[2:end])
+end    
+
+@inline function _leftshift1(xs::Vararg{T,N}) where {N,T}
+    _leftshift1(xs[1], xs[2:end])
+   # return (xs[(head >> nbits) | carry, _rightshift_carry(nbits, (head & ((one(UInt64) << nbits) - 1)) << (64 - nbits), tail...)...)
+end
+
+@inline _leftshift1(carry::T) where {T} = ()
 
 #=
 rightshift_carry & leftshift_carry
