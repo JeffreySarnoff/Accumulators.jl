@@ -12,6 +12,8 @@ export Seq, seq,
     midrange, proportionalrange,
     nminima, nmaxima
 
+using StatsBase, VectorizedStatistics
+
 #= ---- abstract types ---- =#
 
 """
